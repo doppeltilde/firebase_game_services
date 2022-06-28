@@ -1,4 +1,4 @@
-group 'keew.ee.firebase_game_services'
+group 'keew.ee.firebase_game_services_google'
 version '1.0-SNAPSHOT'
 
 buildscript {

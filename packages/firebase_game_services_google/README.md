@@ -1,4 +1,4 @@
-# firebase_game_services
+# firebase_game_services_google
 
 A new Flutter plugin project.
 

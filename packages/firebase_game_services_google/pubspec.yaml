@@ -1,4 +1,4 @@
-name: firebase_game_services
+name: firebase_game_services_google
 description: A new Flutter plugin project.
 version: 0.0.1
 homepage:
@@ -35,8 +35,8 @@ flutter:
   plugin:
     platforms:
       android:
-        package: keew.ee.firebase_game_services
-        pluginClass: FirebaseGameServicesPlugin
+        package: keew.ee.firebase_game_services_google
+        pluginClass: FirebaseGameServicesGooglePlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
