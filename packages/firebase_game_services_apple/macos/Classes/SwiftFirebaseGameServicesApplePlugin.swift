@@ -1,0 +1,1 @@
+apple/Classes/SwiftFirebaseGameServicesApplePlugin.swift
