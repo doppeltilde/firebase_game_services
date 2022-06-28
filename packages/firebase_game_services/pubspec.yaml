@@ -11,10 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_game_services_platform_interface:
-    path: ../firebase_game_services_platform_interface/
-  firebase_game_services_apple:
-    path: ../firebase_game_services_apple/
+  firebase_game_services_platform_interface: ^0.0.1
+  firebase_game_services_apple: ^0.0.1
+  firebase_game_services_google: ^0.0.1
 
 dev_dependencies:
   flutter_test:

@@ -96,9 +96,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
     
-    
-    
-    
     private func authenticateUser(result: @escaping (Bool, FlutterError?) -> Void) {
         let player = GKLocalPlayer.local
         
