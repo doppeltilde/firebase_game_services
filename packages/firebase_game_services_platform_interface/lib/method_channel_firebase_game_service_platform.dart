@@ -2,9 +2,6 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_game_services_platform_interface/firebase_game_services_exception.dart';
 import 'package:firebase_game_services_platform_interface/firebase_game_services_platform_interface.dart';
-import 'package:firebase_game_services_platform_interface/models/access_point.dart';
-import 'package:firebase_game_services_platform_interface/models/achievement.dart';
-import 'package:firebase_game_services_platform_interface/models/score.dart';
 import 'package:flutter/services.dart';
 import 'helpers.dart';
 
@@ -58,10 +55,10 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   }
 
   @override
-  Future<bool> signInWithGameService({String? clientId}) async {
+  Future<bool> signIn({String? clientId}) async {
     try {
-      final dynamic result = await _channel
-          .invokeMethod('sign_in_with_game_service', {'client_id': clientId});
+      final dynamic result =
+          await _channel.invokeMethod('signIn', {'client_id': clientId});
 
       if (result is bool) {
         return result;
@@ -89,12 +86,11 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   }
 
   @override
-  Future<bool> linkGameServicesCredentialsToCurrentUser(
+  Future<bool> signInLinkedUser(
       {String? clientId,
       bool forceSignInIfCredentialAlreadyUsed = false}) async {
     try {
-      final dynamic result = await _channel
-          .invokeMethod('link_game_services_credentials_to_current_user', {
+      final dynamic result = await _channel.invokeMethod('signInLinkedUser', {
         'client_id': clientId,
         'force_sign_in_credential_already_used':
             forceSignInIfCredentialAlreadyUsed,

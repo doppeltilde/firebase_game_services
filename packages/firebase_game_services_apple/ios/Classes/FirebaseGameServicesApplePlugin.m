@@ -1,1 +1,1 @@
-apple/Classes/FirebaseGameServicesApplePlugin.m
+../../apple/Classes/FirebaseGameServicesApplePlugin.m

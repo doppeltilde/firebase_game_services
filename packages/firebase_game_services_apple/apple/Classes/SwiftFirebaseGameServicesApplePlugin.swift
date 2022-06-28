@@ -268,14 +268,14 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
             case "showAccessPoint":
                 let location = (arguments?["location"] as? String) ?? ""
                 showAccessPoint(location: location)
-            case "SignIn":
+            case "signIn":
                 authenticateUser() { cred, error in
                     if let error = error {
                         result(error)
                     }
                     result(true)
                 }
-            case "SignInLinkedUser":
+            case "signInLinkedUser":
                 var forceSignInIfCredentialAlreadyUsed = false
             
                 let args = call.arguments as? Dictionary<String, Any>
@@ -284,7 +284,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     forceSignInIfCredentialAlreadyUsed = (args!["force_sign_in_credential_already_used"] as? Bool) ?? false
                 }
                 
-                linkGameCenterCredentialsToCurrentUser(forceSignInIfCredentialAlreadyUsed: forceSignInIfCredentialAlreadyUsed) { cred, error in
+                SignInLinkedUser(forceSignInIfCredentialAlreadyUsed: forceSignInIfCredentialAlreadyUsed) { cred, error in
                     if let error = error {
                         result(error)
                     }
@@ -298,7 +298,13 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "firebase_game_services_apple", binaryMessenger: registrar.messenger())
+    #if os(iOS)
+    let binaryMessenger = registrar.messenger()
+    #else
+    let binaryMessenger = registrar.messenger
+    #endif
+    
+    let channel = FlutterMethodChannel(name: "firebase_game_services", binaryMessenger: registrar.messenger())
     let instance = SwiftFirebaseGameServicesApplePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }

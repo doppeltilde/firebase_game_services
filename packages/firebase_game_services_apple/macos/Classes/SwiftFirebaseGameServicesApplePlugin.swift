@@ -1,1 +1,1 @@
-apple/Classes/SwiftFirebaseGameServicesApplePlugin.swift
+../../apple/Classes/SwiftFirebaseGameServicesApplePlugin.swift

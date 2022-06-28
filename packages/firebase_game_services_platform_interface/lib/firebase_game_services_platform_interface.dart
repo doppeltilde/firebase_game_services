@@ -8,6 +8,10 @@ import 'package:firebase_game_services_platform_interface/models/achievement.dar
 import 'package:firebase_game_services_platform_interface/models/score.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+export 'models/achievement.dart';
+export 'models/access_point.dart';
+export 'models/score.dart';
+
 abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   /// Constructs a GamesServicesPlatform.
   FirebaseGameServicesPlatform() : super(token: _token);
@@ -81,7 +85,7 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   /// Try to sign in with native Game Service (Play Games on Android and GameCenter on iOS)
   /// Return `true` if success
   /// [clientId] is only for Android if you want to provide a clientId other than the main one in you google-services.json
-  Future<bool> signInWithGameService({String? clientId}) async {
+  Future<bool> signIn({String? clientId}) async {
     throw UnimplementedError("not implemented.");
   }
 
@@ -89,7 +93,7 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   /// Return `true` if success
   /// [clientId] is only for Android if you want to provide a clientId other than the main one in you google-services.json
   /// [forceSignInIfCredentialAlreadyUsed] make user force sign in with game services link failed because of ERROR_CREDENTIAL_ALREADY_IN_USE
-  Future<bool> linkGameServicesCredentialsToCurrentUser(
+  Future<bool> signInLinkedUser(
       {String? clientId,
       bool forceSignInIfCredentialAlreadyUsed = false}) async {
     throw UnimplementedError("not implemented.");
