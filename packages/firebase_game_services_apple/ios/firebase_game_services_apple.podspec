@@ -1,1 +1,0 @@
-apple/firebase_game_services_apple.podspec
