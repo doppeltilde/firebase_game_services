@@ -68,7 +68,8 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   }
 
   /// It will open the leaderboards screen.
-  Future<String?> showLeaderboards({iOSLeaderboardID = ""}) async {
+  Future<String?> showLeaderboards(
+      {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
     throw UnimplementedError("not implemented.");
   }
 
@@ -102,6 +103,18 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   /// Test if a user is already linked to a game service
   /// Advised to be call before linkGameServicesCredentialsToCurrentUser()
   bool isUserLinkedToGameService() {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Get the player id.
+  /// On iOS the player id is unique for your game but not other games.
+  Future<String?> getPlayerID() async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Get the player name.
+  /// On iOS the player alias is the name of the player.
+  Future<String?> getPlayerName() async {
     throw UnimplementedError("not implemented.");
   }
 }

@@ -38,9 +38,12 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   }
 
   @override
-  Future<String?> showLeaderboards({iOSLeaderboardID = ""}) async {
-    return await _channel.invokeMethod(
-        "showLeaderboards", {"iOSLeaderboardID": iOSLeaderboardID});
+  Future<String?> showLeaderboards(
+      {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
+    return await _channel.invokeMethod("showLeaderboards", {
+      "leaderboardID":
+          Helpers.isPlatformAndroid ? androidLeaderboardID : iOSLeaderboardID
+    });
   }
 
   @override
@@ -136,5 +139,15 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
             : 'gc.apple.com');
 
     return isLinked;
+  }
+
+  @override
+  Future<String?> getPlayerID() async {
+    return await _channel.invokeMethod("getPlayerID");
+  }
+
+  @override
+  Future<String?> getPlayerName() async {
+    return await _channel.invokeMethod("getPlayerName");
   }
 }

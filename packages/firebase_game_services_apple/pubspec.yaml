@@ -1,6 +1,6 @@
 name: firebase_game_services_apple
 description: The Apple implementation of firebase_game_services.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/jonafeucht/firebase_game_services
 
 environment:
@@ -11,7 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_game_services_platform_interface: ^0.0.1
+  firebase_game_services_platform_interface: ^0.0.2
+  #  path: ../firebase_game_services_platform_interface/
   firebase_core: ^1.18.0
   firebase_auth: ^3.3.20
 

@@ -42,8 +42,11 @@ class FirebaseGameServices {
   }
 
   /// It will open the leaderboards screen.
-  static Future<String?> showLeaderboards({iOSLeaderboardID = ""}) async {
-    return await platform.showLeaderboards(iOSLeaderboardID: iOSLeaderboardID);
+  static Future<String?> showLeaderboards(
+      {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
+    return await platform.showLeaderboards(
+        iOSLeaderboardID: iOSLeaderboardID,
+        androidLeaderboardID: androidLeaderboardID);
   }
 
   /// Show the iOS Access Point.
@@ -79,5 +82,17 @@ class FirebaseGameServices {
   /// Advised to be call before linkGameServicesCredentialsToCurrentUser()
   static bool isUserLinkedToGameService() {
     return platform.isUserLinkedToGameService();
+  }
+
+  /// Get the player id.
+  /// On iOS the player id is unique for your game but not other games.
+  static Future<String?> getPlayerID() async {
+    return await platform.getPlayerID();
+  }
+
+  /// Get the player name.
+  /// On iOS the player alias is the name used by the Player visible in the leaderboard
+  static Future<String?> getPlayerName() async {
+    return await platform.getPlayerName();
   }
 }

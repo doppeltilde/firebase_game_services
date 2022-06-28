@@ -188,17 +188,17 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     //region Achievements & Leaderboards
     private fun showAchievements(result: Result) {
         showLoginErrorIfNotLoggedIn(result)
-        achievementClient!!.achievementsIntent.addOnSuccessListener { intent ->
+        achievementClient?.achievementsIntent?.addOnSuccessListener { intent ->
             activity?.startActivityForResult(intent, 0)
             result.success("success")
-        }.addOnFailureListener {
+        }?.addOnFailureListener {
             result.error("error", "${it.message}", null)
         }
     }
 
     private fun unlock(achievementID: String, result: Result) {
         showLoginErrorIfNotLoggedIn(result)
-        achievementClient?.unlockImmediate(achievementID)?.addOnSuccessListener {
+            achievementClient?.unlockImmediate(achievementID)?.addOnSuccessListener {
             result.success("success")
         }?.addOnFailureListener {
             result.error("error", it.localizedMessage, null)
@@ -209,34 +209,67 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         showLoginErrorIfNotLoggedIn(result)
         achievementClient?.incrementImmediate(achievementID, count)
             ?.addOnSuccessListener {
-                result.success("success")
-            }?.addOnFailureListener {
-                result.error("error", it.localizedMessage, null)
-            }
-    }
-
-    private fun showLeaderboards(result: Result) {
-        showLoginErrorIfNotLoggedIn(result)
-        leaderboardsClient!!.allLeaderboardsIntent.addOnSuccessListener { intent ->
-            activity?.startActivityForResult(intent, 0)
-            result.success("success")
-        }.addOnFailureListener {
-            result.error("error", "${it.message}", null)
-        }
-    }
-
-    private fun submitScore(leaderboardID: String, score: Int, result: Result) {
-        showLoginErrorIfNotLoggedIn(result)
-        leaderboardsClient?.submitScoreImmediate(leaderboardID, score.toLong())?.addOnSuccessListener {
             result.success("success")
         }?.addOnFailureListener {
             result.error("error", it.localizedMessage, null)
         }
     }
 
+    private fun showLeaderboards(leaderboardID: String, result: Result) {
+        showLoginErrorIfNotLoggedIn(result)
+        val onSuccessListener: ((Intent) -> Unit) = { intent ->
+        activity?.startActivityForResult(intent, 0)
+        result.success("success")
+        }
+        val onFailureListener: ((Exception) -> Unit) = {
+        result.error("error", "${it.message}", null)
+        }
+        if (leaderboardID.isEmpty()) {
+        leaderboardsClient?.allLeaderboardsIntent?.addOnSuccessListener(onSuccessListener)?.addOnFailureListener(onFailureListener)
+        } else {
+        leaderboardsClient?.getLeaderboardIntent(leaderboardID)?.addOnSuccessListener(onSuccessListener)?.addOnFailureListener(onFailureListener)
+        }
+    }
+
+    private fun submitScore(leaderboardID: String, score: Int, result: Result) {
+        showLoginErrorIfNotLoggedIn(result)
+        leaderboardsClient?.submitScoreImmediate(leaderboardID, score.toLong())?.addOnSuccessListener {
+        result.success("success")
+        }?.addOnFailureListener {
+        result.error("error", it.localizedMessage, null)
+        }
+    }
+
     private fun showLoginErrorIfNotLoggedIn(result: Result) {
         if (achievementClient == null || leaderboardsClient == null) {
-            result.error("error", "Please make sure to call signIn() first", null)
+        result.error("error", "Please make sure to call signIn() first", null)
+        }
+    }
+    //endregion
+
+    //region User
+    private fun getPlayerID(result: Result) {
+        showLoginErrorIfNotLoggedIn(result)
+        val activity = activity ?: return
+        val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity) ?: return
+        Games.getPlayersClient(activity, lastSignedInAccount)
+        .currentPlayerId.addOnSuccessListener {
+            result.success(it)
+        }.addOnFailureListener {
+            result.error("error", it.localizedMessage, null)
+        }
+    }
+
+    private fun getPlayerName(result: Result) {
+        showLoginErrorIfNotLoggedIn(result)
+        val activity = activity ?: return
+        val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity) ?: return
+        Games.getPlayersClient(activity, lastSignedInAccount)
+        .currentPlayer
+        .addOnSuccessListener { player ->
+            result.success(player.displayName)
+        }.addOnFailureListener {
+            result.error("error", it.localizedMessage, null)
         }
     }
     //endregion
