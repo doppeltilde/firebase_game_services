@@ -38,7 +38,23 @@ Signs out the user.
 await FirebaseAuth.instance.signOut();
 ```
 
-#### Save
+#### Save Game
+
+##### Save Game Data to iCloud and Google Drive.
+Save game data. Takes two parameters: `data` and `fileName`.
+```dart
+await FirebaseGameServices.createGameSave(data: "data", fileName: "fileName");
+```
+Read game data. Takes one parameter: `fileName`.
+```dart
+await FirebaseGameServices.readGameSave(fileName: "fileName");
+```
+Delete game data. Takes one parameter: `fileName`.
+```dart
+await FirebaseGameServices.deleteGameSave(fileName: "fileName");
+```
+
+##### Save Game Data to Firebase
 This package works in harmony with the Firebase stack.
 
 You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, syncing, and querying data, whatever suits your project best.
