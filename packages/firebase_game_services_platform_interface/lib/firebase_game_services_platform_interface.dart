@@ -117,4 +117,26 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   Future<String?> getPlayerName() async {
     throw UnimplementedError("not implemented.");
   }
+
+  ///  Create & update saved game.
+  /// Takes two parameters:
+  /// [data]
+  /// [fileName]
+  Future<String?> createGameSave({String? data, String? fileName}) async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Read saved game.
+  /// Takes one parameter:
+  /// [fileName]
+  Future<String?> readGameSave({String? fileName}) async {
+    throw UnimplementedError();
+  }
+
+  /// Delete saved game.
+  /// Takes one parameter:
+  /// [fileName]
+  Future<String?> deleteGameSave({String? fileName}) async {
+    throw UnimplementedError("not implemented.");
+  }
 }

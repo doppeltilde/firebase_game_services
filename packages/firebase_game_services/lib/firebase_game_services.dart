@@ -23,7 +23,7 @@ class FirebaseGameServices {
   /// [steps] If the achievement is of the incremental type
   /// you can use this method to increment the steps.
   /// * only for Android (see https://developers.google.com/games/services/android/achievements#unlocking_achievements).
-  static Future<String?> increment({achievement: Achievement}) async {
+  static Future<String?> increment({achievement = Achievement}) async {
     return await platform.increment(achievement: achievement);
   }
 
@@ -32,7 +32,7 @@ class FirebaseGameServices {
   /// [androidLeaderboardID] the leader board id that you want to send the score for in case of android.
   /// [iOSLeaderboardID] the leader board id that you want to send the score for in case of iOS.
   /// [value] the score.
-  static Future<String?> submitScore({score: Score}) async {
+  static Future<String?> submitScore({score = Score}) async {
     return await platform.submitScore(score: score);
   }
 
@@ -94,5 +94,28 @@ class FirebaseGameServices {
   /// On iOS the player alias is the name used by the Player visible in the leaderboard
   static Future<String?> getPlayerName() async {
     return await platform.getPlayerName();
+  }
+
+  ///  Create & update saved game.
+  /// Takes two parameters:
+  /// [data]
+  /// [fileName]
+  static Future<String?> createGameSave(
+      {String? data, String? fileName}) async {
+    return await platform.createGameSave(data: data, fileName: fileName);
+  }
+
+  /// Read saved game.
+  /// Takes one parameter:
+  /// [fileName]
+  static Future<String?> readGameSave({String? fileName}) async {
+    return await platform.readGameSave(fileName: fileName);
+  }
+
+  /// Delete saved game.
+  /// Takes one parameter:
+  /// [fileName]
+  static Future<String?> deleteGameSave({String? fileName}) async {
+    return await platform.deleteGameSave(fileName: fileName);
   }
 }

@@ -198,7 +198,11 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     let vc = GKGameCenterViewController()
     vc.gameCenterDelegate = self
     vc.viewState = .achievements
+    #if os(iOS)
     viewController.present(vc, animated: true, completion: nil)
+    #else
+    viewController.presentAsSheet(vc)
+    #endif
   }
 
   func report(achievementID: String, percentComplete: Double, result: @escaping FlutterResult) {
@@ -242,97 +246,197 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     }
   }
 
-  func getPlayerID(result: @escaping FlutterResult) {
-    if #available(iOS 12.4, *) {
-      let gamePlayerID = GKLocalPlayer.local.gamePlayerID
-      result(gamePlayerID)
-    } else {
-      result("error")
-    }
-  }
+    // MARK: - Game Player
 
-  func getPlayerName(result: @escaping FlutterResult) {
-     if #available(iOS 12.4, *) {
-      let gamePlayerAlias = GKLocalPlayer.local.alias
-      result(gamePlayerAlias)
-    } else {
-      result("error")
-    }
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let arguments = call.arguments as? [String: Any]
-        switch call.method {
-            case "unlock":
-                let achievementID = (arguments?["achievementID"] as? String) ?? ""
-                let percentComplete = (arguments?["percentComplete"] as? Double) ?? 0.0
-                report(achievementID: achievementID, percentComplete: percentComplete, result: result)
-            case "submitScore":
-                let leaderboardID = (arguments?["leaderboardID"] as? String) ?? ""
-                let score = (arguments?["value"] as? Int) ?? 0
-                report(score: Int64(score), leaderboardID: leaderboardID, result: result)
-            case "showAchievements":
-                showAchievements()
-                result("success")
-            case "showLeaderboards":
-                let leaderboardID = (arguments?["iOSLeaderboardID"] as? String) ?? ""
-                showLeaderboardWith(identifier: leaderboardID)
-                result("success")
-            case "hideAccessPoint":
-                hideAccessPoint()
-            case "showAccessPoint":
-                let location = (arguments?["location"] as? String) ?? ""
-                showAccessPoint(location: location)
-            case "getPlayerID":
-                getPlayerID(result: result)
-            case "getPlayerName":
-                getPlayerName(result: result)
-            case "signIn":
-                authenticateUser() { cred, error in
-                    if let error = error {
-                        result(error)
-                    }
-                    result(true)
-                }
-            case "signInLinkedUser":
-                var forceSignInIfCredentialAlreadyUsed = false
-            
-                let args = call.arguments as? Dictionary<String, Any>
-                
-                if(args != nil) {
-                    forceSignInIfCredentialAlreadyUsed = (args!["force_sign_in_credential_already_used"] as? Bool) ?? false
-                }
-                
-                SignInLinkedUser(forceSignInIfCredentialAlreadyUsed: forceSignInIfCredentialAlreadyUsed) { cred, error in
-                    if let error = error {
-                        result(error)
-                    }
-                    result(true)
-                }
-            default:
-                self.log(message: "Unknown method called")
-                result("unimplemented")
-            break
+    func getPlayerID(result: @escaping FlutterResult) {
+        if #available(iOS 12.4, *) {
+        let gamePlayerID = GKLocalPlayer.local.gamePlayerID
+        result(gamePlayerID)
+        } else {
+        result("error")
         }
     }
 
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    #if os(iOS)
-    let binaryMessenger = registrar.messenger()
-    #else
-    let binaryMessenger = registrar.messenger
-    #endif
-    
-    let channel = FlutterMethodChannel(name: "firebase_game_services", binaryMessenger: registrar.messenger())
-    let instance = SwiftFirebaseGameServicesApplePlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
+    func getPlayerName(result: @escaping FlutterResult) {
+        if #available(iOS 12.4, *) {
+        let gamePlayerAlias = GKLocalPlayer.local.alias
+        result(gamePlayerAlias)
+        } else {
+        result("error")
+        }
+    }
+
+    // MARK: - Game Data
+
+    func saveGameData(saveData: String, fileName: String, completion:@escaping (String) -> Void) {
+        let player = GKLocalPlayer.local
+        if player.isAuthenticated {
+            guard let data = saveData.data(using: String.Encoding.utf8) else {
+                completion("encoding error")
+                return
+            }
+            
+            player.saveGameData(data, withName: fileName){
+                (saveGame: GKSavedGame?, error: Error?) -> Void in
+                if error != nil {
+                    print("Error saving: \(String(describing: error))")
+                    
+                    completion("Error saving: \(String(describing: error))")
+                } else {
+                    print("Save game success!")
+                    
+                    completion("true")
+                }
+            }
+        } else {
+            completion("Not authenticated!")
+        }
+    }
+
+    func loadGameData(fileName: String, completion:@escaping (String) -> Void) {
+        let player = GKLocalPlayer.local
+        if player.isAuthenticated {
+           player.fetchSavedGames() { (savedGames, error) in
+                if error != nil {
+                    print("Error fetching saved games: \(String(describing: error))")
+                    
+                    completion("Error fetching saved games: \(String(describing: error))")
+                } else {
+                    if let savedGames = savedGames {
+                        for savedGame in savedGames {
+                            if savedGame.name == fileName {
+                                savedGame.loadData(completionHandler: { (data, error) in
+                                    if error != nil {
+                                        print("Error loading saved game: \(String(describing: error))")
+                                        
+                                        completion("Error loading saved game: \(String(describing: error))")
+                                    } else {
+                                        if let data = data {
+                                            let saveData = String(data: data, encoding: String.Encoding.utf8)
+                                            print("Loaded save data: \(String(describing: saveData))")
+                                            
+                                            completion(String(describing: saveData))
+                                        }
+                                    }
+                                }
+                            )
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            completion("Not authenticated!")
+        }
+    }
+
+    func deleteGameData(fileName: String, completion:@escaping (String) -> Void) {
+        let player = GKLocalPlayer.local
+        if player.isAuthenticated {
+            player.deleteSavedGames(withName: fileName) {
+                (error: Error?) -> Void in
+                if error != nil {
+                    print("Error deleting: \(String(describing: error))")
+                    
+                    completion("Error deleting: \(String(describing: error))")
+                } else {
+                    print("Delete game success!")
+                    
+                    completion("true")
+                }
+            }
+        } else {
+            completion("Not authenticated!")
+        }
+    }
+
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+            let arguments = call.arguments as? [String: Any]
+            switch call.method {
+                case "unlock":
+                    let achievementID = (arguments?["achievementID"] as? String) ?? ""
+                    let percentComplete = (arguments?["percentComplete"] as? Double) ?? 0.0
+                    report(achievementID: achievementID, percentComplete: percentComplete, result: result)
+                case "submitScore":
+                    let leaderboardID = (arguments?["leaderboardID"] as? String) ?? ""
+                    let score = (arguments?["value"] as? Int) ?? 0
+                    report(score: Int64(score), leaderboardID: leaderboardID, result: result)
+                case "showAchievements":
+                    showAchievements()
+                    result("success")
+                case "showLeaderboards":
+                    let leaderboardID = (arguments?["iOSLeaderboardID"] as? String) ?? ""
+                    showLeaderboardWith(identifier: leaderboardID)
+                    result("success")
+                case "hideAccessPoint":
+                    hideAccessPoint()
+                case "showAccessPoint":
+                    let location = (arguments?["location"] as? String) ?? ""
+                    showAccessPoint(location: location)
+                case "getPlayerID":
+                    getPlayerID(result: result)
+                case "getPlayerName":
+                    getPlayerName(result: result)
+
+                case "createGameSave":
+                    let saveData = (arguments?["saveData"] as? String) ?? ""
+                    let fileName = (arguments?["fileName"] as? String) ?? ""
+                    saveGameData(saveData: saveData, fileName: fileName, completion: result)
+                case "readGameSave": 
+                    let name = (arguments?["fileName"] as? String) ?? ""
+                    loadGameData(fileName: name, completion: result)
+                case "deleteGameSave":
+                    let name = (arguments?["fileName"] as? String) ?? ""
+                    deleteGameData(fileName: name, completion: result)
+                
+                case "signIn":
+                    authenticateUser() { cred, error in
+                        if let error = error {
+                            result(error)
+                        }
+                        result(true)
+                    }
+                case "signInLinkedUser":
+                    var forceSignInIfCredentialAlreadyUsed = false
+                
+                    let args = call.arguments as? Dictionary<String, Any>
+                    
+                    if(args != nil) {
+                        forceSignInIfCredentialAlreadyUsed = (args!["force_sign_in_credential_already_used"] as? Bool) ?? false
+                    }
+                    
+                    SignInLinkedUser(forceSignInIfCredentialAlreadyUsed: forceSignInIfCredentialAlreadyUsed) { cred, error in
+                        if let error = error {
+                            result(error)
+                        }
+                        result(true)
+                    }
+
+                default:
+                    self.log(message: "Unknown method called")
+                    result("unimplemented")
+                break
+            }
+        }
+
+
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        #if os(iOS)
+        let binaryMessenger = registrar.messenger()
+        #else
+        let binaryMessenger = registrar.messenger
+        #endif
         
-  private func log(message: StaticString) {
-      if #available(iOS 10.0, *) {
-        os_log(message)
-      }
-  }
+        let channel = FlutterMethodChannel(name: "firebase_game_services", binaryMessenger: registrar.messenger())
+        let instance = SwiftFirebaseGameServicesApplePlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
+    }
+            
+    private func log(message: StaticString) {
+        if #available(iOS 10.0, *) {
+            os_log(message)
+        }
+    }
 }
 
 // MARK: - GKGameCenterControllerDelegate
