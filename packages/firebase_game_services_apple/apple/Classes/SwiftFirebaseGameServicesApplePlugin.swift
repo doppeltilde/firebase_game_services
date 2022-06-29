@@ -96,9 +96,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
     
-    
-    
-    
     private func authenticateUser(result: @escaping (Bool, FlutterError?) -> Void) {
         let player = GKLocalPlayer.local
         
@@ -245,6 +242,24 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     }
   }
 
+  func getPlayerID(result: @escaping FlutterResult) {
+    if #available(iOS 12.4, *) {
+      let gamePlayerID = GKLocalPlayer.local.gamePlayerID
+      result(gamePlayerID)
+    } else {
+      result("error")
+    }
+  }
+
+  func getPlayerName(result: @escaping FlutterResult) {
+     if #available(iOS 12.4, *) {
+      let gamePlayerAlias = GKLocalPlayer.local.alias
+      result(gamePlayerAlias)
+    } else {
+      result("error")
+    }
+  }
+
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any]
         switch call.method {
@@ -268,6 +283,10 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
             case "showAccessPoint":
                 let location = (arguments?["location"] as? String) ?? ""
                 showAccessPoint(location: location)
+            case "getPlayerID":
+                getPlayerID(result: result)
+            case "getPlayerName":
+                getPlayerName(result: result)
             case "signIn":
                 authenticateUser() { cred, error in
                     if let error = error {
