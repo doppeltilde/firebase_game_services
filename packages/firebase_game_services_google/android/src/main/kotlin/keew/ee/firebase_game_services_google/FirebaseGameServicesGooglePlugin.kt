@@ -387,7 +387,8 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 submitScore(leaderboardID, score, result)
             }
             Methods.showLeaderboards -> {
-                showLeaderboards(result)
+                val leaderboardID = call.argument<String>("leaderboardID") ?: ""
+                showLeaderboards(leaderboardID, result)
             }
             Methods.showAchievements -> {
                 showAchievements(result)
@@ -409,6 +410,12 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 gResult = result
                 silentSignIn()
             }
+            Methods.getPlayerID -> {
+                getPlayerID(result)
+            }
+            Methods.getPlayerName -> {
+                getPlayerName(result)
+            }
             else -> result.notImplemented()
         }
     }
@@ -423,4 +430,6 @@ object Methods {
     const val signIn = "signIn"
     const val signInLinkedUser =
         "signInLinkedUser"
+    const val getPlayerID = "getPlayerID"
+    const val getPlayerName = "getPlayerName"
 }
