@@ -60,7 +60,7 @@ This package works in harmony with the Firebase stack.
 You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, syncing, and querying data, whatever suits your project best.
 
 - [Get started with Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart).
-- [Get started with realtime Database](https://firebase.google.com/docs/database/flutter/start).
+- [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
 For static storage, I'd recommend using `Cloud Storage`.
 
@@ -81,7 +81,7 @@ To submit a ```Score``` to specific leaderboard.
 -```value``` the score.  
 
 ``` dart
-await suFirebaseGameServices.submitScore(
+await FirebaseGameServices.submitScore(
 score: Score(
     androidLeaderboardID: 'android_leaderboard_id',
     iOSLeaderboardID: 'ios_leaderboard_id', 

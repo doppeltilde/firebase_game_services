@@ -19,7 +19,7 @@ A new Flutter plugin project.
   s.dependency 'firebase_auth'
   s.static_framework = true
 
-  s.platform = :osx, '11.0'
+  s.platform = :osx, '12.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
 end
