@@ -1,6 +1,6 @@
 name: firebase_game_services_platform_interface
 description: A common platform interface for the firebase_game_services package.
-version: 0.0.2
+version: 0.0.5
 homepage: https://github.com/jonafeucht/firebase_game_services
 
 environment:
@@ -12,10 +12,9 @@ dependencies:
     sdk: flutter
   
   plugin_platform_interface: ^2.1.2
-  firebase_core: ^1.18.0
-  firebase_auth: ^3.3.20
+  firebase_auth: ^3.6.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.1

@@ -1,7 +1,9 @@
 library firebase_game_services;
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:firebase_game_services/firebase_saved_game.dart';
 import 'package:firebase_game_services_platform_interface/firebase_game_services_platform_interface.dart';
 
 class FirebaseGameServices {
@@ -96,26 +98,32 @@ class FirebaseGameServices {
     return await platform.getPlayerName();
   }
 
-  ///  Create & update saved game.
-  /// Takes two parameters:
-  /// [data]
-  /// [fileName]
-  static Future<String?> createGameSave(
-      {String? data, String? fileName}) async {
-    return await platform.createGameSave(data: data, fileName: fileName);
+  /// Save game with [data] and a unique [name].
+  /// The [name] must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
+  static Future<String?> saveGame(
+      {required String data, required String name}) async {
+    return await platform.saveGame(data: data, name: name);
   }
 
-  /// Read saved game.
-  /// Takes one parameter:
-  /// [fileName]
-  static Future<String?> readGameSave({String? fileName}) async {
-    return await platform.readGameSave(fileName: fileName);
+  /// Load game with [name].
+  static Future<String?> loadGame({required String name}) async {
+    return await platform.loadGame(name: name);
   }
 
-  /// Delete saved game.
-  /// Takes one parameter:
-  /// [fileName]
-  static Future<String?> deleteGameSave({String? fileName}) async {
-    return await platform.deleteGameSave(fileName: fileName);
+  /// Get all saved games.
+  static Future<List<SavedGame>?> getSavedGames() async {
+    final result = await platform.getSavedGames();
+    if (result == null) {
+      return null;
+    }
+    final List jsonArray = jsonDecode(result);
+    final savedGames =
+        jsonArray.map((json) => SavedGame.fromJson(json)).toList();
+    return savedGames;
+  }
+
+  /// Delete game with [name].
+  static Future<String?> deleteGame({required String name}) async {
+    return await platform.deleteGame(name: name);
   }
 }

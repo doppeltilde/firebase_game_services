@@ -1,13 +1,12 @@
 import GameKit
 import os
 import FirebaseAuth
+import SwiftUI
 
 #if os(iOS)
 import Flutter
-import UIKit
 #else
 import FlutterMacOS
-import AppKit
 #endif
 
 public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
@@ -41,17 +40,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     getPlayerID(result: result)
                 case "getPlayerName":
                     getPlayerName(result: result)
-
-                case "createGameSave":
-                    let saveData = (arguments?["saveData"] as? String) ?? ""
-                    let fileName = (arguments?["fileName"] as? String) ?? ""
-                    saveGameData(saveData: saveData, fileName: fileName, completion: result)
-                case "readGameSave": 
-                    let name = (arguments?["fileName"] as? String) ?? ""
-                    loadGameData(fileName: name, completion: result)
-                case "deleteGameSave":
-                    let name = (arguments?["fileName"] as? String) ?? ""
-                    deleteGameData(fileName: name, completion: result)
                 
                 case "signIn":
                     authenticateUser() { cred, error in
@@ -76,6 +64,19 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                         result(true)
                     }
 
+                case "saveGame":
+                    let data = (arguments?["data"] as? String) ?? ""
+                    let name = (arguments?["name"] as? String) ?? ""
+                    saveGame(name: name, data: data, result: result)
+                case "loadGame":
+                    let name = (arguments?["name"] as? String) ?? ""
+                    loadGame(name: name, result: result)
+                case "getSavedGames":
+                    getSavedGames(result: result)
+                case "deleteGame":
+                    let name = (arguments?["name"] as? String) ?? ""
+                    deleteGame(name: name, result: result)
+
                 default:
                     self.log(message: "Unknown method called")
                     result("unimplemented")
@@ -84,12 +85,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        #if os(iOS)
-        let binaryMessenger = registrar.messenger()
-        #else
-        let binaryMessenger = registrar.messenger
-        #endif
-        
         let channel = FlutterMethodChannel(name: "firebase_game_services", binaryMessenger: registrar.messenger())
         let instance = SwiftFirebaseGameServicesApplePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -101,15 +96,9 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
 
-    #if os(iOS)
-    var viewController: UIViewController {
-        return UIApplication.shared.windows.first!.rootViewController!
+    var viewController : UIViewController? {
+        return UIApplication.shared.keyWindow?.rootViewController
     }
-    #else
-    var viewController: NSViewController {
-        return NSApplication.shared.windows.first!.contentViewController!
-    }
-    #endif
 
     // Mark - Authentication
     
@@ -186,7 +175,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                 
                 if let vc = vc {
                     #if os(iOS)
-                    self.viewController.present(vc, animated: true, completion: nil)
+                    self.viewController?.present(vc, animated: true, completion: nil)
                     #else
                     self.viewController.presentAsSheet(vc)
                     #endif
@@ -226,7 +215,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                 
                 if let vc = vc {
                     #if os(iOS)
-                    self.viewController.present(vc, animated: true, completion: nil)
+                    self.viewController?.present(vc, animated: true, completion: nil)
                     #else
                     self.viewController.presentAsSheet(vc)
                     #endif
@@ -250,9 +239,9 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         vc.leaderboardIdentifier = identifier
 
         #if os(iOS)
-        viewController.present(vc, animated: true, completion: nil)
+        self.viewController?.present(vc, animated: true, completion: nil)
         #else
-        viewController.presentAsSheet(vc)
+        self.viewController.presentAsSheet(vc)
         #endif
     }
 
@@ -275,9 +264,9 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         vc.gameCenterDelegate = self
         vc.viewState = .achievements
         #if os(iOS)
-        viewController.present(vc, animated: true, completion: nil)
+        self.viewController?.present(vc, animated: true, completion: nil)
         #else
-        viewController.presentAsSheet(vc)
+        self.viewController.presentAsSheet(vc)
         #endif
     }
 
@@ -342,115 +331,75 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
 
-    // MARK: - Game Data
-
-    private func saveGameData(saveData: String, fileName: String, completion:@escaping (String) -> Void) {
+    // MARK: - Save game
+    
+    func saveGame(name: String, data: String, result: @escaping FlutterResult) {
         let player = GKLocalPlayer.local
-        if player.isAuthenticated {
-            guard let data = saveData.data(using: String.Encoding.utf8) else {
-                completion("encoding error")
-                return
-            }
-            
-            player.saveGameData(data, withName: fileName){
-                (saveGame: GKSavedGame?, error: Error?) -> Void in
-                if error != nil {
-                    print("Error saving: \(String(describing: error))")
-                    
-                    completion("Error saving: \(String(describing: error))")
-                } else {
-                    print("Save game success!")
-                    
-                    completion("true")
-                }
-            }
-        } else {
-            completion("Not authenticated!")
+        guard let data = data.data(using: .utf8) else {
+        result("error")
+        return }
+        player.saveGameData(data, withName: name) { savedGame, error in
+        guard error == nil else {
+            result("error")
+            return
+        }
+        result(nil)
         }
     }
     
-
-    private func loadGameData(fileName: String, completion:@escaping (String) -> Void) {
+    func getSavedGames(result: @escaping FlutterResult) {
         let player = GKLocalPlayer.local
-        if player.isAuthenticated {
-           player.fetchSavedGames() { (savedGames, error) in
-                if error != nil {
-                    print("Error fetching saved games: \(String(describing: error))")
-                    
-                    completion("Error fetching saved games: \(String(describing: error))")
-                } else {
-                    if let savedGames = savedGames {
-                        for savedGame in savedGames {
-                            if savedGame.name == fileName {
-                                savedGame.loadData(completionHandler: { (data, error) in
-                                    if error != nil {
-                                        print("Error loading saved game: \(String(describing: error))")
-                                        
-                                        completion("Error loading saved game: \(String(describing: error))")
-                                    } else {
-                                        if let data = data {
-                                            let saveData = String(data: data, encoding: String.Encoding.utf8)
-                                            print("Loaded save data: \(String(describing: saveData))")
-                                            
-                                            completion(String(describing: saveData))
-                                        }
-                                    }
-                                }
-                            )
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            completion("Not authenticated!")
+        player.fetchSavedGames(completionHandler: { savedGames, error in
+        guard error == nil else {
+            result("error")
+            return
         }
-    }
-
-    private func deleteGameData(fileName: String, completion:@escaping (String) -> Void) {
-        let player = GKLocalPlayer.local
-        if player.isAuthenticated {
-            player.deleteSavedGames(withName: fileName) {
-                (error: Error?) -> Void in
-                if error != nil {
-                    print("Error deleting: \(String(describing: error))")
-                    
-                    completion("Error deleting: \(String(describing: error))")
-                } else {
-                    print("Delete game success!")
-                    
-                    completion("true")
-                }
-            }
+        let items = savedGames?
+            .map({ SavedGame(name: $0.name ?? "",
+            modificationDate: UInt64($0.modificationDate?.timeIntervalSince1970 ?? 0),
+            deviceName: $0.deviceName ?? "") }) ?? []
+        if let data = try? JSONEncoder().encode(items) {
+            print(data)
+            let string = String(data: data, encoding: String.Encoding.utf8)
+            result(string)
         } else {
-            completion("Not authenticated!")
+            result("error")
         }
+        })
     }
-
-    private func getSavedGameList(completion:@escaping (String) -> Void) {
+    
+    func loadGame(name: String, result: @escaping FlutterResult) {
         let player = GKLocalPlayer.local
-        if player.isAuthenticated {
-            player.fetchSavedGames { (savedGames, error) in
-                if error != nil {
-                    print("Error fetching saved games: \(String(describing: error))")
-                    
-                    completion("Error fetching saved games: \(String(describing: error))")
-                } else {
-                    if let savedGames = savedGames {
-                        var saveData = "["
-                        for savedGame in savedGames {
-                            saveData += "\"\(savedGame.name)\","
-                        }
-                        saveData = String(saveData.dropLast())
-                        saveData += "]"
-                        print("Loaded saved games: \(saveData)")
-                        
-                        completion(saveData)
-                    }
-                }
+        player.fetchSavedGames(completionHandler: { savedGames, error in
+        guard error == nil else {
+            result("error")
+            return
+        }
+        
+        guard let item = savedGames?
+            .first(where: { $0.name == name }) else {
+            result("error")
+            return
+        }
+        item.loadData { data, error in
+            guard let data = data, error == nil else {
+            result("error")
+            return
             }
-        } else {
-            completion("Not authenticated!")
+            let string = String(data: data, encoding: String.Encoding.utf8)
+            result(string)
+        }
+        })
+    }
+    
+    func deleteGame(name: String, result: @escaping FlutterResult) {
+        let player = GKLocalPlayer.local
+        player.deleteSavedGames(withName: name) { error in
+        guard error == nil else {
+            result("error")
+            return
+        }
+        result(nil)
         }
     }
 }
@@ -458,12 +407,17 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
 // MARK: - GKGameCenterControllerDelegate
 
 extension SwiftFirebaseGameServicesApplePlugin: GKGameCenterControllerDelegate {
-
   public func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
     #if os(iOS)
-    viewController.dismiss(animated: true, completion: nil)
+      self.viewController?.dismiss(animated: true, completion: nil)
     #else
-    gameCenterViewController.dismiss(true)
+      self.viewController.dismiss(true)
     #endif
   }
+}
+
+struct SavedGame: Codable {
+  var name: String
+  var modificationDate: UInt64
+  var deviceName: String
 }

@@ -151,27 +151,24 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
     return await _channel.invokeMethod("getPlayerName");
   }
 
-  // Game Save
-
-  ///Save game process to GameCenter passing [data] and [fileName] as `List`
-  ///
-  ///Return `String` error message if process was successful or `Future.error`
   @override
-  Future<String?> createGameSave({String? data, String? fileName}) async {
-    return await _channel.invokeMethod("createGameSave", [data, fileName]);
-  }
-
-  ///Load last saved game proccess from GameCenter
-  ///
-  ///Return `String` data or `ERROR` if any error is occurred
-  ///or `Future.error` with `ERROR` message
-  @override
-  Future<String?> readGameSave({String? fileName}) async {
-    return await _channel.invokeMethod("readGameSave", fileName);
+  Future<String?> saveGame({required String data, required String name}) async {
+    return await _channel
+        .invokeMethod("saveGame", {"data": data, "name": name});
   }
 
   @override
-  Future<String?> deleteGameSave({String? fileName}) async {
-    return await _channel.invokeMethod("deleteGameSave", fileName);
+  Future<String?> loadGame({required String name}) async {
+    return await _channel.invokeMethod("loadGame", {"name": name});
+  }
+
+  @override
+  Future<String?> getSavedGames() async {
+    return await _channel.invokeMethod("getSavedGames");
+  }
+
+  @override
+  Future<String?> deleteGame({required String name}) async {
+    return await _channel.invokeMethod("deleteGame", {"name": name});
   }
 }
