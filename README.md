@@ -38,19 +38,56 @@ Signs out the user.
 await FirebaseAuth.instance.signOut();
 ```
 
-#### Save
+#### Save Game Data to Firebase
 This package works in harmony with the Firebase stack.
-
-You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, syncing, and querying data, whatever suits your project best.
+You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, syncing, and querying data - whatever suits your project best.
 
 - [Get started with Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart).
-- [Get started with realtime Database](https://firebase.google.com/docs/database/flutter/start).
+- [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
 For static storage, I'd recommend using `Cloud Storage`.
 
 - [Get started with Cloud Storage](https://firebase.google.com/docs/storage/flutter/start).
 
 Of course you can also use your own backend.
+
+#### Save Game Data to iCloud and Google Drive
+Even though it is recommended to save game data to firebase, you can also utilize the players iCloud or Google Drive.
+
+##### Save Game
+Takes two parameters: `data` and a unique `name`.
+```dart
+final data = jsonEncode(GameData(96, "sword").toJson());
+final result = await FirebaseGameServices.saveGame(data: data, name: "foo");
+```
+
+*The `name` must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").*  
+
+
+##### Load game  
+Takes one parameter: `name`.
+
+```dart
+final result = await FirebaseGameServices.loadGame(name: "foo");
+if (result != null) {
+  final Map json = jsonDecode(result);
+  final gameData = GameData.fromJson(json);
+}
+```
+
+##### Delete game  
+Takes one parameter: `name`.
+```dart
+final result = await FirebaseGameServices.deleteGame(name: "foo");
+```
+
+##### Get saved games 
+To get all saved games.
+
+```dart
+final result = await FirebaseGameServices.getSavedGames();
+```
+
 #### Show leaderboards
 To show the leaderboards screen. It takes the leaderbord id for android and iOS.  
 ``` dart
@@ -65,7 +102,7 @@ To submit a ```Score``` to specific leaderboard.
 -```value``` the score.  
 
 ``` dart
-await suFirebaseGameServices.submitScore(
+await FirebaseGameServices.submitScore(
 score: Score(
     androidLeaderboardID: 'android_leaderboard_id',
     iOSLeaderboardID: 'ios_leaderboard_id', 

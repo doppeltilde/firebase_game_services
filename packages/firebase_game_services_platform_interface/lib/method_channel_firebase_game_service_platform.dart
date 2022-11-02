@@ -150,4 +150,25 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   Future<String?> getPlayerName() async {
     return await _channel.invokeMethod("getPlayerName");
   }
+
+  @override
+  Future<String?> saveGame({required String data, required String name}) async {
+    return await _channel
+        .invokeMethod("saveGame", {"data": data, "name": name});
+  }
+
+  @override
+  Future<String?> loadGame({required String name}) async {
+    return await _channel.invokeMethod("loadGame", {"name": name});
+  }
+
+  @override
+  Future<String?> getSavedGames() async {
+    return await _channel.invokeMethod("getSavedGames");
+  }
+
+  @override
+  Future<String?> deleteGame({required String name}) async {
+    return await _channel.invokeMethod("deleteGame", {"name": name});
+  }
 }

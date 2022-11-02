@@ -1,7 +1,9 @@
 library firebase_game_services;
 
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:firebase_game_services/firebase_saved_game.dart';
 import 'package:firebase_game_services_platform_interface/firebase_game_services_platform_interface.dart';
 
 class FirebaseGameServices {
@@ -23,7 +25,7 @@ class FirebaseGameServices {
   /// [steps] If the achievement is of the incremental type
   /// you can use this method to increment the steps.
   /// * only for Android (see https://developers.google.com/games/services/android/achievements#unlocking_achievements).
-  static Future<String?> increment({achievement: Achievement}) async {
+  static Future<String?> increment({achievement = Achievement}) async {
     return await platform.increment(achievement: achievement);
   }
 
@@ -32,7 +34,7 @@ class FirebaseGameServices {
   /// [androidLeaderboardID] the leader board id that you want to send the score for in case of android.
   /// [iOSLeaderboardID] the leader board id that you want to send the score for in case of iOS.
   /// [value] the score.
-  static Future<String?> submitScore({score: Score}) async {
+  static Future<String?> submitScore({score = Score}) async {
     return await platform.submitScore(score: score);
   }
 
@@ -94,5 +96,34 @@ class FirebaseGameServices {
   /// On iOS the player alias is the name used by the Player visible in the leaderboard
   static Future<String?> getPlayerName() async {
     return await platform.getPlayerName();
+  }
+
+  /// Save game with [data] and a unique [name].
+  /// The [name] must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
+  static Future<String?> saveGame(
+      {required String data, required String name}) async {
+    return await platform.saveGame(data: data, name: name);
+  }
+
+  /// Load game with [name].
+  static Future<String?> loadGame({required String name}) async {
+    return await platform.loadGame(name: name);
+  }
+
+  /// Get all saved games.
+  static Future<List<SavedGame>?> getSavedGames() async {
+    final result = await platform.getSavedGames();
+    if (result == null) {
+      return null;
+    }
+    final List jsonArray = jsonDecode(result);
+    final savedGames =
+        jsonArray.map((json) => SavedGame.fromJson(json)).toList();
+    return savedGames;
+  }
+
+  /// Delete game with [name].
+  static Future<String?> deleteGame({required String name}) async {
+    return await platform.deleteGame(name: name);
   }
 }
