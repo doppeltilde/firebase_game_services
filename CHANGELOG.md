@@ -1,3 +1,6 @@
+## 1.0.1
+- Bumped dependencies.
+
 ## 1.0.0
 - Bumped versions.
 - Added iCloud and Google Drive saving.
