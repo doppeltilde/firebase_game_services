@@ -172,7 +172,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
             self.getCredentialsAndSignIn(result: result)
         } else {
             player.authenticateHandler = { vc, error in
-                
                 if let vc = vc {
                     #if os(iOS)
                     self.viewController?.present(vc, animated: true, completion: nil)
@@ -187,7 +186,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                 }
             }
         }
-        
     }
     
     private func SignInLinkedUser(forceSignInIfCredentialAlreadyUsed: Bool, result: @escaping (Bool, FlutterError?) -> Void) {
