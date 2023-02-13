@@ -1,3 +1,6 @@
+## 1.0.3
+- Bumped dependencies.
+
 ## 1.0.2
 - Bumped dependencies.
 
