@@ -1,3 +1,7 @@
+## 1.0.4
+* Fix native crash caused by callback error.
+* Bumped dependencies.
+
 ## 1.0.3
 - Bumped dependencies.
 
