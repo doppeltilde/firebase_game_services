@@ -1,6 +1,6 @@
 name: firebase_game_services_apple
 description: The Apple implementation of firebase_game_services.
-version: 0.1.2
+version: 0.1.3
 homepage: https://github.com/jonafeucht/firebase_game_services
 
 environment:

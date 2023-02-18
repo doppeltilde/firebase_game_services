@@ -157,3 +157,8 @@ To get the player you can call:
 ```dart
 final playerID = FirebaseGameServices.getPlayerID();
 ```
+
+---
+
+*Notice:*
+*This package was initally created to be used in-house, as such the development is first and foremost aligned with the internal requirements.*

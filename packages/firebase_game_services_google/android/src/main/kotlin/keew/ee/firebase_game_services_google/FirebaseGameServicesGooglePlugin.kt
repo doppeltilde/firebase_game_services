@@ -290,26 +290,26 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
    //region Save game
 
-    private fun getSavedGames(result: Result) {
-        snapshotsClient?.load(true)
-        ?.addOnCompleteListener { task ->
-            val gson = Gson()
-            val data = task.result.get()
-            if (data == null) {
-            result.error(
-                PluginError.failedToGetSavedGames.errorCode(),
-                PluginError.failedToGetSavedGames.errorMessage(),
-                null
-            )
-            return@addOnCompleteListener
-            }
-            val items = data
-            .toList()
-            .map { SavedGame(it.uniqueName, it.lastModifiedTimestamp, it.deviceName) }
+    private fun getSavedGames(result: MethodChannel.Result) {
+     snapshotsClient?.load(true)
+       ?.addOnSuccessListener { annotatedData ->
+         val gson = Gson()
+         val data = annotatedData.get()
+         if (data == null) {
+           result.error(
+             PluginError.failedToGetSavedGames.errorCode(),
+             PluginError.failedToGetSavedGames.errorMessage(),
+             null
+           )
+           return@addOnSuccessListener
+         }
+        val items = data
+        .toList()
+        .map { SavedGame(it.uniqueName, it.lastModifiedTimestamp, it.deviceName) }
 
-            val string = gson.toJson(items) ?: ""
-            result.success(string)
-            data.release()
+        val string = gson.toJson(items) ?: ""
+        result.success(string)
+        data.release()
         }
     }
 
