@@ -3,7 +3,7 @@ import 'package:firebase_game_services/firebase_game_services.dart';
 extension FirebaseGameServicesUser on FirebaseGameServices {
   /// Get the player id.
   /// On iOS the player id is unique for your game but not other games.
-  Future<String?> getPlayerID() async {
+  Future<String?> getPlayerId() async {
     return await FirebaseGameServices.platform.getPlayerID();
   }
 

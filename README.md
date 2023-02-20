@@ -91,9 +91,27 @@ achievement: Achievement(
     androidID: 'android_id', iOSID: 'ios_id',
     percentComplete: 100, steps: 2
     ),
-); 
-```  
+);
+```
 
+#### Show achievements
+```dart
+await FirebaseGameServices.instance.showAchievements();
+```
+
+#### Player Name
+To get the player name:
+```dart
+final playerName = await FirebaseGameServices.instance.getPlayerName();
+```
+
+#### Player Id
+To get the player id:
+```dart
+final playerId = await FirebaseGameServices.instance.getPlayerId();
+```
+
+## Platform specific
 #### Increment (Android Only)  
 To increment the steps for android achievement.
 
@@ -115,13 +133,6 @@ To hide the access point.
 
 ```dart
 await FirebaseGameServices.instance.hideAccessPoint();
-```  
-
-#### Player id  
-To get the player you can call:
-
-```dart
-final playerID = FirebaseGameServices.instance.getPlayerID();
 ```
 
 ---
