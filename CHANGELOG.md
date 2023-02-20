@@ -1,3 +1,8 @@
+## 2.0.0
+* **Refactor**: `FirebaseGameServices.` is now `FirebaseGameServices.instance`.
+* **Technical debt**: Got rid of iCloud and Google Drive save.
+* Bumped dependencies.
+
 ## 1.0.4
 * Fix native crash caused by callback error.
 * Bumped dependencies.

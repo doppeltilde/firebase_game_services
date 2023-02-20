@@ -290,7 +290,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
    //region Save game
 
-    private fun getSavedGames(result: MethodChannel.Result) {
+    private fun getSavedGames(result: Result) {
      snapshotsClient?.load(true)
        ?.addOnSuccessListener { annotatedData ->
          val gson = Gson()
