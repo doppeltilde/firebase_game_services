@@ -35,12 +35,6 @@ Signs in the currently linked user with native Game Service (Play Games on Andro
 await FirebaseGameServices.instance.signInLinkedUser();
 ```
 
-#### Sign out
-Signs the user out (not recommended):
-```dart
-await FirebaseAuth.instance.signOut();
-```
-
 #### Save Game Data to Firebase
 This package works in harmony with the Firebase stack.
 You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, syncing, and querying data - whatever suits your project best.
@@ -109,6 +103,12 @@ final playerName = await FirebaseGameServices.instance.getPlayerName();
 To get the player id:
 ```dart
 final playerId = await FirebaseGameServices.instance.getPlayerId();
+```
+
+#### Sign out
+Signs the user out (not recommended):
+```dart
+await FirebaseAuth.instance.signOut();
 ```
 
 ## Platform specific

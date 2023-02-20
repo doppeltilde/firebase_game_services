@@ -19,7 +19,7 @@ void main() {
   });
 
   group('FirebaseGameServicesUser', () {
-    test('getPlayerID returns a string', () async {
+    test('getPlayerId returns a string', () async {
       final playerId = await FirebaseGameServices.instance.getPlayerId();
       expect(playerId, isA<String>());
     });
