@@ -1,9 +1,8 @@
 ## 2.0.0
-* **Refactor**: `FirebaseGameServices.` is now `FirebaseGameServices.instance`.
+* **Refactor**: `FirebaseGameServices.` is now `FirebaseGameServices.instance.`.
 * **Player Id**: `getPlayerID();` is now `getPlayerId();`.
 * **Technical debt**: Got rid of iCloud and Google Drive save.
-
-* Bumped dependencies.
+* **Other**: Bumped dependencies.
 
 ## 1.0.4
 * Fix native crash caused by callback error.
