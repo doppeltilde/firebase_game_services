@@ -29,6 +29,8 @@ import io.flutter.plugin.common.PluginRegistry
 
 
 private const val CHANNEL_NAME = "firebase_game_services"
+private const val RC_ACHIEVEMENT_UI = 9003
+private const val RC_LEADERBOARD_UI = 9004
 
 class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) : FlutterPlugin,
     MethodChannel.MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
@@ -115,9 +117,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     private fun signInFirebaseWithPlayGames(acct: GoogleSignInAccount) {
         val auth = FirebaseAuth.getInstance()
-
         val authCode = acct.serverAuthCode ?: throw Exception("auth_code_null")
-
         val credential = PlayGamesAuthProvider.getCredential(authCode)
 
         auth.signInWithCredential(credential).addOnCompleteListener { result ->
@@ -167,8 +167,9 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     //region Achievements & Leaderboards
     private fun showAchievements(result: Result) {
         showLoginErrorIfNotLoggedIn(result)
+
         achievementClient?.achievementsIntent?.addOnSuccessListener { intent ->
-            activity?.startActivityForResult(intent, 0)
+            activity?.startActivityForResult(intent, RC_ACHIEVEMENT_UI)
             result.success("success")
         }?.addOnFailureListener {
             result.error("error", "${it.message}", null)
@@ -197,7 +198,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private fun showLeaderboards(leaderboardID: String, result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         leaderboardsClient?.getLeaderboardIntent(leaderboardID)?.addOnSuccessListener { intent ->
-            activity?.startActivityForResult(intent, 0)
+            activity?.startActivityForResult(intent, RC_LEADERBOARD_UI)
             result.success("success")
         }?.addOnFailureListener {
             result.error("error", it.localizedMessage, null)
