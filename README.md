@@ -126,8 +126,6 @@ To show the access point you can call the following function:
 await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading);
 ```  
 
-This feature support only on the iOS, on Android there is nothing like this supported natively.  
-
 #### Hide AccessPoint (iOS Only)  
 To hide the access point.
 
