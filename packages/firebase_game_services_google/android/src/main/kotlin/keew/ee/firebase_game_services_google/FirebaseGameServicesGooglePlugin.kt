@@ -3,58 +3,40 @@ package keew.ee.firebase_game_services_google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-
 import android.util.Log
-import android.view.Gravity
 import androidx.annotation.NonNull
-
 import com.google.android.gms.auth.api.Auth
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.PlayGamesAuthProvider
-
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.auth.api.signin.GoogleSignInResult
-
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.games.AchievementsClient
-import com.google.android.gms.games.Games
 import com.google.android.gms.games.LeaderboardsClient
-import com.google.android.gms.games.PlayersClient
-
-import com.google.android.gms.games.snapshot.Snapshot
-import com.google.android.gms.games.snapshot.SnapshotMetadata
-import com.google.android.gms.games.snapshot.SnapshotMetadataChange
-import com.google.android.gms.games.SnapshotsClient
-import com.google.android.gms.games.SnapshotsClient.DataOrConflict
-import com.google.android.gms.tasks.Task
-
-import com.google.android.gms.drive.Drive
-import com.google.gson.Gson
-
+import com.google.android.gms.games.PlayGames
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.PlayGamesAuthProvider
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
-import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import java.lang.Exception
-import java.io.IOException
+
 
 private const val CHANNEL_NAME = "firebase_game_services"
-private const val RC_SIGN_IN = 9000
 
 class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) : FlutterPlugin,
     MethodChannel.MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
 
+    var gamesSignInClient = PlayGames.getGamesSignInClient(activity!!)
+
+
     private var googleSignInClient: GoogleSignInClient? = null
-    private var snapshotsClient: SnapshotsClient? = null
     private var achievementClient: AchievementsClient? = null
     private var leaderboardsClient: LeaderboardsClient? = null
     private var activityPluginBinding: ActivityPluginBinding? = null
@@ -82,32 +64,18 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             }
             return context.getString(stringRes)
         }
-
-        @JvmStatic
-        fun registerWith(registrar: PluginRegistry.Registrar) {
-            val channel = MethodChannel(registrar.messenger(), CHANNEL_NAME)
-            val plugin = FirebaseGameServicesGooglePlugin(registrar.activity())
-            channel.setMethodCallHandler(plugin)
-            registrar.addActivityResultListener(plugin)
-        }
     }
 
     private fun silentSignIn() {
-        val activity = activity ?: return
 
-        val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
+        gamesSignInClient.isAuthenticated.addOnCompleteListener { isAuthenticatedTask ->
+            val isAuthenticated = isAuthenticatedTask.isSuccessful &&
+                    isAuthenticatedTask.result.isAuthenticated
 
-        val builder = GoogleSignInOptions.Builder(
-            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).requestServerAuthCode(authCode).requestScopes(Drive.SCOPE_APPFOLDER)
-
-        googleSignInClient = GoogleSignIn.getClient(activity, builder.build())
-        googleSignInClient?.silentSignIn()?.addOnCompleteListener { task ->
-            pendingOperation = PendingOperation(method!!, gResult!!)
-
-            if (task.isSuccessful) {
-                handleSignInResult(task.result)
+            if (isAuthenticated) {
+              handleSignInResult()
             } else {
-                Log.e("Error", "signInError", task.exception)
+                Log.e("Error", "signInError", isAuthenticatedTask.exception)
                 Log.i("ExplicitSignIn", "Trying explicit sign in")
                 explicitSignIn(clientId)
             }
@@ -121,24 +89,17 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
         val builder = GoogleSignInOptions.Builder(
             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
-        ).requestServerAuthCode(authCode).requestScopes(Drive.SCOPE_APPFOLDER)
+        ).requestServerAuthCode(authCode)
 
         googleSignInClient = GoogleSignIn.getClient(activity, builder.build())
-        activity.startActivityForResult(googleSignInClient?.signInIntent, RC_SIGN_IN)
+        activity.startActivityForResult(googleSignInClient?.signInIntent, 9000)
     }
 
-    private fun handleSignInResult(googleSignInAccount: GoogleSignInAccount) {
+    private fun handleSignInResult() {
         val activity = this.activity!!
 
-        val gamesClient =
-            Games.getGamesClient(activity, GoogleSignIn.getLastSignedInAccount(activity)!!)
-
-
-        achievementClient = Games.getAchievementsClient(activity, googleSignInAccount)
-        leaderboardsClient = Games.getLeaderboardsClient(activity, googleSignInAccount)
-
-        gamesClient.setViewForPopups(activity.findViewById(android.R.id.content))
-        gamesClient.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+        achievementClient = PlayGames.getAchievementsClient(activity)
+        leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
 
         val account = GoogleSignIn.getLastSignedInAccount(activity)
 
@@ -149,6 +110,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 linkCredentialsFirebaseWithPlayGames(account)
             }
         }
+
     }
 
     private fun signInFirebaseWithPlayGames(acct: GoogleSignInAccount) {
@@ -172,11 +134,8 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     private fun linkCredentialsFirebaseWithPlayGames(acct: GoogleSignInAccount) {
         val auth = FirebaseAuth.getInstance()
-
         val currentUser = auth.currentUser ?: throw  Exception("current_user_null")
-
         val authCode = acct.serverAuthCode ?: throw Exception("auth_code_null")
-
         val credential = PlayGamesAuthProvider.getCredential(authCode)
 
 
@@ -266,7 +225,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         showLoginErrorIfNotLoggedIn(result)
         val activity = activity ?: return
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity) ?: return
-        Games.getPlayersClient(activity, lastSignedInAccount)
+        PlayGames.getPlayersClient(activity)
         .currentPlayerId.addOnSuccessListener {
             result.success(it)
         }.addOnFailureListener {
@@ -278,7 +237,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         showLoginErrorIfNotLoggedIn(result)
         val activity = activity ?: return
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity) ?: return
-        Games.getPlayersClient(activity, lastSignedInAccount)
+        PlayGames.getPlayersClient(activity)
         .currentPlayer
         .addOnSuccessListener { player ->
             result.success(player.displayName)
@@ -286,134 +245,6 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             result.error("error", it.localizedMessage, null)
         }
     }
-    //endregion
-
-   //region Save game
-
-    private fun getSavedGames(result: Result) {
-     snapshotsClient?.load(true)
-       ?.addOnSuccessListener { annotatedData ->
-         val gson = Gson()
-         val data = annotatedData.get()
-         if (data == null) {
-           result.error(
-             PluginError.failedToGetSavedGames.errorCode(),
-             PluginError.failedToGetSavedGames.errorMessage(),
-             null
-           )
-           return@addOnSuccessListener
-         }
-        val items = data
-        .toList()
-        .map { SavedGame(it.uniqueName, it.lastModifiedTimestamp, it.deviceName) }
-
-        val string = gson.toJson(items) ?: ""
-        result.success(string)
-        data.release()
-        }
-    }
-
-    private fun saveGame(
-        data: String, desc: String, name: String, result: Result
-    ) {
-        val metadataChange = SnapshotMetadataChange.Builder()
-        .setDescription(desc)
-        .build()
-        snapshotsClient?.open(name, true)
-        ?.addOnCompleteListener { task ->
-            val snapshot = task.result.data
-            if (snapshot != null) {
-            // Set the data payload for the snapshot
-            snapshot.snapshotContents.writeBytes(data.toByteArray())
-
-            // Commit the operation
-            snapshotsClient?.commitAndClose(snapshot, metadataChange)
-                ?.addOnSuccessListener {
-                result.success(null)
-                }
-                ?.addOnFailureListener {
-                result.error(PluginError.failedToSaveGame.errorCode(), it.localizedMessage, null)
-                }
-            } else {
-            result.error(
-                PluginError.failedToSaveGame.errorCode(),
-                PluginError.failedToSaveGame.errorMessage(),
-                null
-            )
-            }
-        }
-    }
-
-    private fun deleteGame(name: String, result: Result) {
-        // Open the saved game using its name.
-        snapshotsClient?.open(name, false)
-        ?.addOnFailureListener {
-            result.error(
-            PluginError.failedToDeleteSavedGame.errorCode(),
-            it.localizedMessage ?: "",
-            null
-            )
-        }
-        ?.continueWith { snapshotOrConflict ->
-            val snapshot = snapshotOrConflict.result.data
-            if (snapshot?.metadata == null) {
-                result.error(
-                PluginError.failedToDeleteSavedGame.errorCode(),
-                PluginError.failedToDeleteSavedGame.errorMessage(),
-                null
-                )
-                return@continueWith
-            }
-            snapshotsClient?.delete(snapshot.metadata)
-                ?.addOnSuccessListener {
-                result.success(it)
-                }
-                ?.addOnFailureListener {
-                result.error(
-                    PluginError.failedToDeleteSavedGame.errorCode(),
-                    it.localizedMessage ?: "",
-                    null
-                )
-                }
-        }
-    }
-
-    private fun loadGame(name: String, result: Result) {
-        // Open the saved game using its name.
-        snapshotsClient?.open(name, false)
-        ?.addOnFailureListener {
-            result.error(
-            PluginError.failedToLoadGame.errorCode(),
-            it.localizedMessage ?: "",
-            null
-            )
-        }
-        ?.continueWith {
-            val snapshot = it.result.data
-
-            // Opening the snapshot was a success and any conflicts have been resolved.
-            try {
-            // Extract the raw data from the snapshot.
-            val value = snapshot?.snapshotContents?.readFully()
-            if (value != null) {
-                result.success(String(value))
-            } else {
-                result.error(
-                PluginError.failedToLoadGame.errorCode(),
-                PluginError.failedToLoadGame.errorMessage(),
-                null
-                )
-            }
-            } catch (e: Exception) {
-            result.error(
-                PluginError.failedToLoadGame.errorCode(),
-                e.localizedMessage ?: "",
-                null
-            )
-            }
-        }
-    }
-
     //endregion
 
     //region Events
@@ -498,13 +329,13 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     //region ActivityResultListener
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == 9000) {
         val result = data?.let { Auth.GoogleSignInApi.getSignInResultFromIntent(it) }
 
         val signInAccount = result?.signInAccount
 
         if (result?.isSuccess == true && signInAccount != null) {
-            handleSignInResult(signInAccount)
+            handleSignInResult()
         } else {
             finishPendingOperationWithError(ApiException(result?.status ?: Status(0)))
             var message = result?.status?.statusMessage ?: ""
@@ -563,22 +394,6 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             Methods.getPlayerName -> {
                 getPlayerName(result)
             }
-            Methods.saveGame -> {
-            val data = call.argument<String>("data") ?: ""
-            val name = call.argument<String>("name") ?: ""
-            saveGame(data, name, name, result)
-            }
-            Methods.loadGame -> {
-                val name = call.argument<String>("name") ?: ""
-                loadGame(name, result)
-            }
-            Methods.getSavedGames -> {
-                getSavedGames(result)
-            }
-            Methods.deleteGame -> {
-                val name = call.argument<String>("name") ?: ""
-                deleteGame(name, result)
-            }
             else -> {
                 result.notImplemented()
             }
@@ -597,15 +412,4 @@ object Methods {
         "signInLinkedUser"
     const val getPlayerID = "getPlayerID"
     const val getPlayerName = "getPlayerName"
-    const val saveGame = "saveGame"
-    const val loadGame = "loadGame"
-    const val getSavedGames = "getSavedGames"
-    const val deleteGame = "deleteGame"
 }
-
-
-data class SavedGame(
-  val name: String?,
-  val modificationDate: Long?,
-  val deviceName: String?
-)

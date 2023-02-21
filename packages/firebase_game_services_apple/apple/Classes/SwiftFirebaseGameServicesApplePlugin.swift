@@ -64,19 +64,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                         result(true)
                     }
 
-                case "saveGame":
-                    let data = (arguments?["data"] as? String) ?? ""
-                    let name = (arguments?["name"] as? String) ?? ""
-                    saveGame(name: name, data: data, result: result)
-                case "loadGame":
-                    let name = (arguments?["name"] as? String) ?? ""
-                    loadGame(name: name, result: result)
-                case "getSavedGames":
-                    getSavedGames(result: result)
-                case "deleteGame":
-                    let name = (arguments?["name"] as? String) ?? ""
-                    deleteGame(name: name, result: result)
-
                 default:
                     self.log(message: "Unknown method called")
                     result("unimplemented")
@@ -328,78 +315,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         result("error")
         }
     }
-
-    // MARK: - Save game
-    
-    func saveGame(name: String, data: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        guard let data = data.data(using: .utf8) else {
-        result("error")
-        return }
-        player.saveGameData(data, withName: name) { savedGame, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        result(nil)
-        }
-    }
-    
-    func getSavedGames(result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.fetchSavedGames(completionHandler: { savedGames, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        let items = savedGames?
-            .map({ SavedGame(name: $0.name ?? "",
-            modificationDate: UInt64($0.modificationDate?.timeIntervalSince1970 ?? 0),
-            deviceName: $0.deviceName ?? "") }) ?? []
-        if let data = try? JSONEncoder().encode(items) {
-            print(data)
-            let string = String(data: data, encoding: String.Encoding.utf8)
-            result(string)
-        } else {
-            result("error")
-        }
-        })
-    }
-    
-    func loadGame(name: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.fetchSavedGames(completionHandler: { savedGames, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        
-        guard let item = savedGames?
-            .first(where: { $0.name == name }) else {
-            result("error")
-            return
-        }
-        item.loadData { data, error in
-            guard let data = data, error == nil else {
-            result("error")
-            return
-            }
-            let string = String(data: data, encoding: String.Encoding.utf8)
-            result(string)
-        }
-        })
-    }
-    
-    func deleteGame(name: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.deleteSavedGames(withName: name) { error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        result(nil)
-        }
-    }
 }
 
 // MARK: - GKGameCenterControllerDelegate
@@ -412,10 +327,4 @@ extension SwiftFirebaseGameServicesApplePlugin: GKGameCenterControllerDelegate {
       self.viewController.dismiss(true)
     #endif
   }
-}
-
-struct SavedGame: Codable {
-  var name: String
-  var modificationDate: UInt64
-  var deviceName: String
 }
