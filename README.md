@@ -42,7 +42,7 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
 - [Get started with Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart).
 - [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
-#####Firestore Example
+##### Firestore Example
 ```dart
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
