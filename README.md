@@ -43,6 +43,7 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
 - [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
 ##### Firestore Example
+This example sets a value of `myValue` in a Firebase Firestore document with the current user's ID as the document ID.
 ```dart
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
