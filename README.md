@@ -42,6 +42,31 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
 - [Get started with Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart).
 - [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
+#####Firestore Example
+```dart
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    try {
+        if (auth.currentUser != null) {
+        if (myValue == null || myValue.isEmpty) {
+            throw Exception('myValue cannot be null or empty');
+        }
+        
+        await firestore.collection("my-collection").doc(auth.currentUser!.uid).set(
+            {
+            "my-field": myValue,
+            },
+            SetOptions(merge: true),
+        );
+        } else {
+        throw Exception('User is not signed in');
+        }
+    } catch (e) {
+        debugPrint('Error: $e');
+    }
+```
+
 For static storage, I'd recommend using `Cloud Storage`.
 
 - [Get started with Cloud Storage](https://firebase.google.com/docs/storage/flutter/start).
