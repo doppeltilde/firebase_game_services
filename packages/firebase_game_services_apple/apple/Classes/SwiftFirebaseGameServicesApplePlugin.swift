@@ -10,9 +10,7 @@ import FlutterMacOS
 #endif
 
 public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
-
-    // Mark - FlutterPlugin
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
             let arguments = call.arguments as? [String: Any]
             switch call.method {
@@ -37,9 +35,18 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     let location = (arguments?["location"] as? String) ?? ""
                     showAccessPoint(location: location)
                 case "getPlayerID":
-                    getPlayerID(result: result)
+                    getGamePlayerID(result: result)
                 case "getPlayerName":
-                    getPlayerName(result: result)
+                    getGamePlayerAlias(result: result)
+
+                // TODO: Implement
+                case "isUnderage":
+                    isUnderage(result: result)
+                case "isMultiplayerGamingRestricted":
+                    isMultiplayerGamingRestricted(result: result)
+                case "playerIsPersonalizedCommunicationRestricted":
+                    isPersonalizedCommunicationRestricted(result: result)
+                // END TODO
                 
                 case "signIn":
                     authenticateUser() { cred, error in
@@ -152,24 +159,30 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func authenticateUser(result: @escaping (Bool, FlutterError?) -> Void) {
-        let player = GKLocalPlayer.local
-        // If player is already authenticated
-        if(player.isAuthenticated) {
-            self.getCredentialsAndSignIn(result: result)
+    private func authenticateUser(result: @escaping (AuthenticationResult) -> Void) {
+        guard let player = GKLocalPlayer.local else {
+            result(.failure(FlutterError(code: "no_player_detected", message: "No player detected on this phone", details: nil)))
+            return
+        }
+        
+        if player.isAuthenticated {
+            getCredentialsAndSignIn(result: result)
         } else {
-            player.authenticateHandler = { vc, error in
-                if let vc = vc {
+            player.authenticateHandler = { [weak self] vc, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    result(.failure(FlutterError(code: "authentication_failed", message: error.localizedDescription, details: nil)))
+                } else if player.isAuthenticated {
+                    self.getCredentialsAndSignIn(result: result)
+                } else if let vc = vc {
                     #if os(iOS)
                     self.viewController?.present(vc, animated: true, completion: nil)
                     #else
                     self.viewController.presentAsSheet(vc)
                     #endif
-                } else if player.isAuthenticated {
-                    self.getCredentialsAndSignIn(result: result)
                 } else {
-                    result(false, FlutterError.init(code: "no_player_detected", message: "No player detected on this phone", details:nil))
-                    return
+                    result(.failure(FlutterError(code: "no_player_detected", message: "No player detected on this phone", details: nil)))
                 }
             }
         }
@@ -217,10 +230,10 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     
     // MARK: - Leaderboard
 
-    private func showLeaderboardWith(identifier: String) {
+    private func showLeaderboardWith(identifier: String, result: @escaping FlutterResult) {
         let vc = GKGameCenterViewController()
         vc.gameCenterDelegate = self
-        vc.viewState = .achievements
+        vc.viewState = .leaderboards
         vc.leaderboardIdentifier = identifier
 
         #if os(iOS)
@@ -255,66 +268,125 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         #endif
     }
 
-    private func report(achievementID: String, percentComplete: Double, result: @escaping FlutterResult) {
+    private func report(achievementID: String, percentComplete: Float, result: @escaping FlutterResult) {
         let achievement = GKAchievement(identifier: achievementID)
         achievement.percentComplete = percentComplete
         achievement.showsCompletionBanner = true
         GKAchievement.report([achievement]) { (error) in
-        guard error == nil else {
-            result(error?.localizedDescription ?? "")
-            return
-        }
-        result("success")
+            if let error = error {
+                let errorMessage = "Failed to report achievement: \(achievementID)"
+                DispatchQueue.main.async {
+                    result(errorMessage)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    result("success")
+                }
+            }
         }
     }
+
     
     // MARK: - AccessPoint
 
-    private func showAccessPoint(location: String) {
-        if #available(iOS 14.0, *) {
-        var gkLocation: GKAccessPoint.Location = .topLeading
-        switch location {
-        case "topLeading":
-            gkLocation = .topLeading
-        case "topTrailing":
-            gkLocation = .topTrailing
-        case "bottomLeading":
-            gkLocation = .bottomLeading
-        case "bottomTrailing":
-            gkLocation = .bottomTrailing
-        default:
-            break
+    private func showAccessPoint(location: GKAccessPointLocation) throws {
+        guard #available(iOS 14.0, *) else {
+            throw GameCenterError.unsupportedVersion
         }
-        GKAccessPoint.shared.location = gkLocation
+        GKAccessPoint.shared.location = location.gkLocation
         GKAccessPoint.shared.isActive = true
-        }
     }
   
-    private func hideAccessPoint() {
+    private func hideAccessPoint() throws {
         if #available(iOS 14.0, *) {
-        GKAccessPoint.shared.isActive = false
+            GKAccessPoint.shared.isActive = false
+        } else {
+            throw GameCenterError.unsupportedVersion
         }
     }
 
     // MARK: - Game Player
 
-    private func getPlayerID(result: @escaping FlutterResult) {
+    private func getGamePlayerID(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
-        let gamePlayerID = GKLocalPlayer.local.gamePlayerID
+        guard let gamePlayerID = GKLocalPlayer.local.gamePlayerID else {
+            result(FlutterError(code: "player_not_found", message: "Could not find game player ID.", details: nil))
+            return
+        }
         result(gamePlayerID)
         } else {
-        result("error")
+        result(FlutterError(code: "unsupported_version", message: "Game Center not supported on this version of iOS.", details: nil))
         }
     }
 
-    private func getPlayerName(result: @escaping FlutterResult) {
+    private func getGamePlayerAlias(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
-        let gamePlayerAlias = GKLocalPlayer.local.alias
+        guard let gamePlayerAlias = GKLocalPlayer.local.alias else {
+            result(FlutterError(code: "player_not_found", message: "Could not find game player alias.", details: nil))
+            return
+        }
         result(gamePlayerAlias)
         } else {
-        result("error")
+        result(FlutterError(code: "unsupported_version", message: "Game Center not supported on this version of iOS.", details: nil))
         }
     }
+
+    private func isUnderage(result: @escaping FlutterResult) {
+        result(currentPlayer.isUnderage)
+    }
+    
+    private func isMultiplayerGamingRestricted(result: @escaping FlutterResult) {
+        if #available(iOS 13.0, *) {
+        result(currentPlayer.isMultiplayerGamingRestricted)
+        } else {
+        let errorMessage = "The isMultiplayerGamingRestricted property is not supported on this version of iOS."
+        let flutterError = FlutterError(code: "not_supported", message: errorMessage, details: nil)
+        result(flutterError)
+        }
+    }
+
+    func isPersonalizedCommunicationRestricted(result: @escaping FlutterResult) {
+        if #available(iOS 14.0, *) {
+        result(currentPlayer.isPersonalizedCommunicationRestricted)
+        } else {
+        result(PluginError.notSupportedForThisOSVersion.flutterError())
+        }
+    }
+
+
+    // MARK: - Enums
+
+    private enum AuthenticationResult {
+        case success
+        case failure(FlutterError)
+    }
+
+    private enum GameCenterError: Error {
+        case unsupportedVersion
+    }
+
+    @available(iOS 14.0, *)
+    private enum GKAccessPointLocation {
+    case topLeading
+    case topTrailing
+    case bottomLeading
+    case bottomTrailing
+    
+        var gkLocation: GKAccessPoint.Location {
+            switch self {
+            case .topLeading:
+                return .topLeading
+            case .topTrailing:
+                return .topTrailing
+            case .bottomLeading:
+                return .bottomLeading
+            case .bottomTrailing:
+                return .bottomTrailing
+            }
+        }
+    }
+
+
 }
 
 // MARK: - GKGameCenterControllerDelegate

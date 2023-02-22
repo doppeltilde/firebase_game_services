@@ -2,7 +2,7 @@
 
 [![Pub](https://img.shields.io/pub/v/firebase_game_services.svg?style=popout&include_prereleases)](https://pub.dartlang.org/packages/firebase_game_services)
 
-A Dart package, linking Google's Play Games and Apple's Game Center with Firebase.
+Dart package linking Google's Play Games and Apple's Game Center with Firebase.
 
 ---
 
