@@ -67,9 +67,10 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
     }
 ```
 
-For static storage, I'd recommend using `Cloud Storage`.
+For static storage, I'd recommend using `Cloud Storage` or `PocketBase`.
 
 - [Get started with Cloud Storage](https://firebase.google.com/docs/storage/flutter/start).
+- [Get started with PocketBase](https://pocketbase.io).
 
 Of course you can also use your own backend.
 
