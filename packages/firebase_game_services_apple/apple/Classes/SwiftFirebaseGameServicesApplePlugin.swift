@@ -37,7 +37,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                 case "getPlayerID":
                     getGamePlayerID(result: result)
                 case "getPlayerName":
-                    getGamePlayerAlias(result: result)
+                    getPlayerName(result: result)
 
                 // TODO: Implement
                 case "isUnderage":
@@ -159,30 +159,24 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func authenticateUser(result: @escaping (AuthenticationResult) -> Void) {
-        guard let player = GKLocalPlayer.local else {
-            result(.failure(FlutterError(code: "no_player_detected", message: "No player detected on this phone", details: nil)))
-            return
-        }
-        
-        if player.isAuthenticated {
-            getCredentialsAndSignIn(result: result)
+    private func authenticateUser(result: @escaping (Bool, FlutterError?) -> Void) {
+        let player = GKLocalPlayer.local
+        // If player is already authenticated
+        if(player.isAuthenticated) {
+            self.getCredentialsAndSignIn(result: result)
         } else {
-            player.authenticateHandler = { [weak self] vc, error in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    result(.failure(FlutterError(code: "authentication_failed", message: error.localizedDescription, details: nil)))
-                } else if player.isAuthenticated {
-                    self.getCredentialsAndSignIn(result: result)
-                } else if let vc = vc {
+            player.authenticateHandler = { vc, error in
+                if let vc = vc {
                     #if os(iOS)
                     self.viewController?.present(vc, animated: true, completion: nil)
                     #else
                     self.viewController.presentAsSheet(vc)
                     #endif
+                } else if player.isAuthenticated {
+                    self.getCredentialsAndSignIn(result: result)
                 } else {
-                    result(.failure(FlutterError(code: "no_player_detected", message: "No player detected on this phone", details: nil)))
+                    result(false, FlutterError.init(code: "no_player_detected", message: "No player detected on this phone", details:nil))
+                    return
                 }
             }
         }
@@ -230,7 +224,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     
     // MARK: - Leaderboard
 
-    private func showLeaderboardWith(identifier: String, result: @escaping FlutterResult) {
+    private func showLeaderboardWith(identifier: String) {
         let vc = GKGameCenterViewController()
         vc.gameCenterDelegate = self
         vc.viewState = .leaderboards
@@ -268,7 +262,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         #endif
     }
 
-    private func report(achievementID: String, percentComplete: Float, result: @escaping FlutterResult) {
+    private func report(achievementID: String, percentComplete: Double, result: @escaping FlutterResult) {
         let achievement = GKAchievement(identifier: achievementID)
         achievement.percentComplete = percentComplete
         achievement.showsCompletionBanner = true
@@ -289,19 +283,29 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     
     // MARK: - AccessPoint
 
-    private func showAccessPoint(location: GKAccessPointLocation) throws {
-        guard #available(iOS 14.0, *) else {
-            throw GameCenterError.unsupportedVersion
+    private func showAccessPoint(location: String) {
+        if #available(iOS 14.0, *) {
+        var gkLocation: GKAccessPoint.Location = .topLeading
+        switch location {
+        case "topLeading":
+            gkLocation = .topLeading
+        case "topTrailing":
+            gkLocation = .topTrailing
+        case "bottomLeading":
+            gkLocation = .bottomLeading
+        case "bottomTrailing":
+            gkLocation = .bottomTrailing
+        default:
+            break
         }
-        GKAccessPoint.shared.location = location.gkLocation
+        GKAccessPoint.shared.location = gkLocation
         GKAccessPoint.shared.isActive = true
+        }
     }
   
-    private func hideAccessPoint() throws {
+    private func hideAccessPoint() {
         if #available(iOS 14.0, *) {
-            GKAccessPoint.shared.isActive = false
-        } else {
-            throw GameCenterError.unsupportedVersion
+        GKAccessPoint.shared.isActive = false
         }
     }
 
@@ -309,35 +313,29 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
 
     private func getGamePlayerID(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
-        guard let gamePlayerID = GKLocalPlayer.local.gamePlayerID else {
-            result(FlutterError(code: "player_not_found", message: "Could not find game player ID.", details: nil))
-            return
-        }
+        let gamePlayerID = GKLocalPlayer.local.gamePlayerID
         result(gamePlayerID)
         } else {
-        result(FlutterError(code: "unsupported_version", message: "Game Center not supported on this version of iOS.", details: nil))
+        result("error")
         }
     }
 
-    private func getGamePlayerAlias(result: @escaping FlutterResult) {
+    private func getPlayerName(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
-        guard let gamePlayerAlias = GKLocalPlayer.local.alias else {
-            result(FlutterError(code: "player_not_found", message: "Could not find game player alias.", details: nil))
-            return
-        }
+        let gamePlayerAlias = GKLocalPlayer.local.alias
         result(gamePlayerAlias)
         } else {
-        result(FlutterError(code: "unsupported_version", message: "Game Center not supported on this version of iOS.", details: nil))
+        result("error")
         }
     }
 
     private func isUnderage(result: @escaping FlutterResult) {
-        result(currentPlayer.isUnderage)
+        result(GKLocalPlayer.local.isUnderage)
     }
     
     private func isMultiplayerGamingRestricted(result: @escaping FlutterResult) {
         if #available(iOS 13.0, *) {
-        result(currentPlayer.isMultiplayerGamingRestricted)
+        result(GKLocalPlayer.local.isMultiplayerGamingRestricted)
         } else {
         let errorMessage = "The isMultiplayerGamingRestricted property is not supported on this version of iOS."
         let flutterError = FlutterError(code: "not_supported", message: errorMessage, details: nil)
@@ -347,46 +345,11 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
 
     func isPersonalizedCommunicationRestricted(result: @escaping FlutterResult) {
         if #available(iOS 14.0, *) {
-        result(currentPlayer.isPersonalizedCommunicationRestricted)
+        result(GKLocalPlayer.local.isPersonalizedCommunicationRestricted)
         } else {
-        result(PluginError.notSupportedForThisOSVersion.flutterError())
+        result("Not supported.")
         }
     }
-
-
-    // MARK: - Enums
-
-    private enum AuthenticationResult {
-        case success
-        case failure(FlutterError)
-    }
-
-    private enum GameCenterError: Error {
-        case unsupportedVersion
-    }
-
-    @available(iOS 14.0, *)
-    private enum GKAccessPointLocation {
-    case topLeading
-    case topTrailing
-    case bottomLeading
-    case bottomTrailing
-    
-        var gkLocation: GKAccessPoint.Location {
-            switch self {
-            case .topLeading:
-                return .topLeading
-            case .topTrailing:
-                return .topTrailing
-            case .bottomLeading:
-                return .bottomLeading
-            case .bottomTrailing:
-                return .bottomTrailing
-            }
-        }
-    }
-
-
 }
 
 // MARK: - GKGameCenterControllerDelegate
