@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "_flutterfire_internals",
-      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/_flutterfire_internals-1.0.15",
+      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/_flutterfire_internals-1.0.16",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
@@ -45,25 +45,25 @@
     },
     {
       "name": "firebase_auth",
-      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth-4.2.8",
+      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth-4.2.9",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
     {
       "name": "firebase_auth_platform_interface",
-      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth_platform_interface-6.11.10",
+      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth_platform_interface-6.11.11",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
     {
       "name": "firebase_auth_web",
-      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth_web-5.2.7",
+      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_auth_web-5.2.8",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
     {
       "name": "firebase_core",
-      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_core-2.6.1",
+      "rootUri": "file:///Users/jonafeucht/.pub-cache/hosted/pub.dev/firebase_core-2.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
@@ -218,7 +218,7 @@
       "languageVersion": "2.15"
     }
   ],
-  "generated": "2023-02-21T07:31:21.804926Z",
+  "generated": "2023-02-24T12:39:06.309233Z",
   "generator": "pub",
   "generatorVersion": "3.0.0-245.0.dev"
 }

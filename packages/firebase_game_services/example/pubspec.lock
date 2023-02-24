@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "953f097772b5fd095e0ee6eeeab34e3a42de91d5f43fa86b5de8485a57494f96"
+      sha256: "64fcb0dbca4386356386c085142fa6e79c00a3326ceaa778a2d25f5d9ba61441"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.15"
+    version: "1.0.16"
   async:
     dependency: transitive
     description:
@@ -69,34 +69,34 @@ packages:
     dependency: transitive
     description:
       name: firebase_auth
-      sha256: "4238545c2dd88774195bbb588182eff7f383ffe8b83e47302f1cb50a79f3dc01"
+      sha256: "9907d80446466e638dad31c195150b305dffd145dc57610fcd12c72289432143"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.8"
+    version: "4.2.9"
   firebase_auth_platform_interface:
     dependency: transitive
     description:
       name: firebase_auth_platform_interface
-      sha256: "32d31705603b335b140a73bf8c933ee57ecec9f31f2d82b2371bb5ce714a6535"
+      sha256: c645fec50b0391aa878288f58fa4fe9762c271380c457aedf5c7c9b718604f68
       url: "https://pub.dev"
     source: hosted
-    version: "6.11.10"
+    version: "6.11.11"
   firebase_auth_web:
     dependency: transitive
     description:
       name: firebase_auth_web
-      sha256: d20d5c2d14fd0ec422d6a58caada47354a4066f981f0130abda15bce37e53fa4
+      sha256: "2dcf2a36852b9091741b4a4047a02e1f2c43a62c6cacec7df573a793a6543e6d"
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.7"
+    version: "5.2.8"
   firebase_core:
     dependency: transitive
     description:
       name: firebase_core
-      sha256: "46b80acfb472d8abc500c2cb6ce65c4b5237d825e4c23bfc3efc70df9eec1a6e"
+      sha256: fe30ac230f12f8836bb97e6e09197340d3c584526825b1746ea362a82e1e43f7
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.1"
+    version: "2.7.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -123,23 +123,26 @@ packages:
   firebase_game_services_apple:
     dependency: transitive
     description:
-      path: "../../firebase_game_services_apple"
-      relative: true
-    source: path
+      name: firebase_game_services_apple
+      sha256: "73d128c8be6ee7e3462dbeccf4a950ea7d67b85ae48cfb837d09a9713e36932e"
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.0"
   firebase_game_services_google:
     dependency: transitive
     description:
-      path: "../../firebase_game_services_google"
-      relative: true
-    source: path
+      name: firebase_game_services_google
+      sha256: "9b372926d39bb3e2aa8d52886bd6594ca8672c27e0641ccef2f916cf50702d18"
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.0"
   firebase_game_services_platform_interface:
     dependency: transitive
     description:
-      path: "../../firebase_game_services_platform_interface"
-      relative: true
-    source: path
+      name: firebase_game_services_platform_interface
+      sha256: "69ec5b6496ca35a0c1d9effe828f45820231a48bdff892d03872437907b4c9e6"
+      url: "https://pub.dev"
+    source: hosted
     version: "2.0.0"
   flutter:
     dependency: "direct main"
