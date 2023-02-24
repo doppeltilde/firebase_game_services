@@ -151,24 +151,22 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
     return await _channel.invokeMethod("getPlayerName");
   }
 
+  /// Check if player is underage (always false on Android).
   @override
-  Future<String?> saveGame({required String data, required String name}) async {
-    return await _channel
-        .invokeMethod("saveGame", {"data": data, "name": name});
+  Future<bool?> isUnderage() async {
+    return await _channel.invokeMethod("isUnderage");
   }
 
+  /// Check if player is restricted from joining multiplayer games (always false on Android).
   @override
-  Future<String?> loadGame({required String name}) async {
-    return await _channel.invokeMethod("loadGame", {"name": name});
+  Future<bool?> isMultiplayerGamingRestricted() async {
+    return await _channel.invokeMethod("isMultiplayerGamingRestricted");
   }
 
+  /// Check if player is restricted from using personalized communication on
+  /// the device (always false on Android).
   @override
-  Future<String?> getSavedGames() async {
-    return await _channel.invokeMethod("getSavedGames");
-  }
-
-  @override
-  Future<String?> deleteGame({required String name}) async {
-    return await _channel.invokeMethod("deleteGame", {"name": name});
+  Future<bool?> isPersonalizedCommunicationRestricted() async {
+    return await _channel.invokeMethod("isPersonalizedCommunicationRestricted");
   }
 }
