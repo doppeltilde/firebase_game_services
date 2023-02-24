@@ -5,6 +5,9 @@ import 'package:firebase_game_services_platform_interface/firebase_game_services
 export 'package:firebase_game_services/extensions/achievements.dart';
 export 'package:firebase_game_services/extensions/auth.dart';
 export 'package:firebase_game_services/extensions/user.dart';
+export 'package:firebase_game_services_platform_interface/models/achievement.dart';
+export 'package:firebase_game_services_platform_interface/models/access_point.dart';
+export 'package:firebase_game_services_platform_interface/models/score.dart';
 
 class FirebaseGameServices {
   static final FirebaseGameServices instance = FirebaseGameServices._();
