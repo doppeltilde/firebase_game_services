@@ -27,6 +27,8 @@ import io.flutter.plugin.common.PluginRegistry
 
 private const val CHANNEL_NAME = "firebase_game_services"
 private const val RC_SIGN_IN = 9000
+private const val RC_ACHIEVEMENT_UI = 9003
+private const val RC_LEADERBOARD_UI = 9004
 
 class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) : FlutterPlugin,
     MethodChannel.MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
@@ -156,12 +158,11 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         }
     }
 
-
     //region Achievements & Leaderboards
     private fun showAchievements(result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         achievementClient?.achievementsIntent?.addOnSuccessListener { intent ->
-            activity?.startActivityForResult(intent, 0)
+            activity?.startActivityForResult(intent, RC_ACHIEVEMENT_UI)
             result.success("success")
         }?.addOnFailureListener {
             result.error("error", "${it.message}", null)
@@ -190,7 +191,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private fun showLeaderboards(leaderboardID: String, result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         val onSuccessListener: ((Intent) -> Unit) = { intent ->
-            activity?.startActivityForResult(intent, 0)
+            activity?.startActivityForResult(intent, RC_LEADERBOARD_UI)
             result.success("success")
         }
         val onFailureListener: ((Exception) -> Unit) = {
@@ -225,11 +226,11 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val activity = activity ?: return
 
         PlayGames.getPlayersClient(activity)
-            .currentPlayer.addOnCompleteListener { task: Task<Player?>? ->
-                result.success(task?.result?.playerId)
-            }.addOnFailureListener {
-            result.error("error", it.localizedMessage, null)
-        }
+            .currentPlayer.addOnCompleteListener { task: Task<Player?> ->
+                result.success(task.result?.playerId)
+            }.addOnFailureListener { exception: Exception ->
+                result.error("error", exception.localizedMessage, null)
+            }
     }
 
     private fun getPlayerName(result: Result) {
@@ -238,10 +239,10 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
         PlayGames.getPlayersClient(activity)
             .currentPlayer
-            .addOnCompleteListener { task: Task<Player?>? ->
-                result.success(task?.result?.displayName)
-            }.addOnFailureListener {
-                result.error("error", it.localizedMessage, null)
+            .addOnCompleteListener { task: Task<Player?> ->
+                result.success(task.result?.displayName)
+            }.addOnFailureListener { exception: Exception ->
+                result.error("error", exception.localizedMessage, null)
             }
     }
     //endregion

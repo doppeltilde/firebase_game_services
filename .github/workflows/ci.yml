@@ -1,0 +1,44 @@
+name: CI
+on:
+    pull_request:
+      branches:
+        - main
+        - develop
+    push:
+      branches:
+        - develop
+
+defaults:
+  run:
+    working-directory: packages/firebase_game_services/example
+
+jobs:
+  build_ios:
+    name: Build iOS
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+      - run: flutter pub get
+      - run: flutter build ios --no-codesign
+
+  build_android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+      - run: flutter pub get
+      - run: flutter build appbundle
