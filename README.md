@@ -19,6 +19,11 @@ Dart package linking Google's Play Games and Apple's Game Center with Firebase.
 1. [Firebase Android Setup](https://firebase.google.com/docs/flutter/setup?platform=android).
 2. [Authenticate Using Google Play Games Services on Android](https://firebase.google.com/docs/auth/android/play-games).
 
+#### Minimum requirements
+Android `minSdkVersion >=23`
+iOS `>=12.0`
+macOS `>=12.0`
+
 ---
 
 ## Usage
@@ -43,7 +48,7 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
 - [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
 ##### Firestore Example
-This example sets a value of `myValue` in a Firebase Firestore document with the current user's ID as the document ID.
+This example sets a value of `myValue` in a Firebase Firestore document with the current users ID as the document ID inside of a defined collection.
 ```dart
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
