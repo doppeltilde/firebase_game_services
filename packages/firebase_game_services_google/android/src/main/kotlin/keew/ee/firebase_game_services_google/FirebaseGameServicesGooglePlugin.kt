@@ -3,7 +3,6 @@ package keew.ee.firebase_game_services_google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-
 import android.util.Log
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -12,10 +11,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
-import com.google.android.gms.games.AchievementsClient
-import com.google.android.gms.games.PlayGames
-import com.google.android.gms.games.PlayGamesSdk
-import com.google.android.gms.games.LeaderboardsClient
+import com.google.android.gms.games.*
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.PlayGamesAuthProvider
@@ -23,11 +20,10 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
-import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import java.lang.Exception
 
 private const val CHANNEL_NAME = "firebase_game_services"
 private const val RC_SIGN_IN = 9000
@@ -73,6 +69,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
         ).requestServerAuthCode(authCode)
         googleSignInClient = GoogleSignIn.getClient(activity, builder.build())
+
         googleSignInClient?.silentSignIn()?.addOnCompleteListener { task ->
             pendingOperation = PendingOperation(method!!, gResult!!)
 
@@ -91,26 +88,22 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
         val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
 
-        val builder = GoogleSignInOptions.Builder(
-            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
-        ).requestServerAuthCode(authCode)
-        googleSignInClient = GoogleSignIn.getClient(activity, builder.build())
+        googleSignInClient = GoogleSignIn.getClient(activity,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                .requestServerAuthCode(authCode).build())
         activity.startActivityForResult(googleSignInClient?.signInIntent, RC_SIGN_IN)
     }
 
     private fun handleSignInResult() {
-        val activity = this.activity!!
+        val activity = activity ?: return
 
         achievementClient = PlayGames.getAchievementsClient(activity)
         leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
 
-        val account = GoogleSignIn.getLastSignedInAccount(activity)
-
-        if (account != null) {
-            if (method == Methods.signIn) {
-                signInFirebaseWithPlayGames(account)
-            } else if (method == Methods.signInLinkedUser) {
-                linkCredentialsFirebaseWithPlayGames(account)
+        GoogleSignIn.getLastSignedInAccount(activity)?.let { account ->
+            when (method) {
+                Methods.signIn -> signInFirebaseWithPlayGames(account)
+                Methods.signInLinkedUser -> linkCredentialsFirebaseWithPlayGames(account)
             }
         }
     }
@@ -119,9 +112,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val auth = FirebaseAuth.getInstance()
 
         val authCode = acct.serverAuthCode ?: throw Exception("auth_code_null")
-
         val credential = PlayGamesAuthProvider.getCredential(authCode)
-
         auth.signInWithCredential(credential).addOnCompleteListener { result ->
             if (result.isSuccessful) {
                 finishPendingOperationWithSuccess()
@@ -138,11 +129,8 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val auth = FirebaseAuth.getInstance()
 
         val currentUser = auth.currentUser ?: throw  Exception("current_user_null")
-
         val authCode = acct.serverAuthCode ?: throw Exception("auth_code_null")
-
         val credential = PlayGamesAuthProvider.getCredential(authCode)
-
 
         currentUser.linkWithCredential(credential).addOnCompleteListener { result ->
             if (result.isSuccessful) {
@@ -235,21 +223,23 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private fun getPlayerID(result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         val activity = activity ?: return
+
         PlayGames.getPlayersClient(activity)
-            .currentPlayerId.addOnSuccessListener {
-                result.success(it)
+            .currentPlayer.addOnCompleteListener { task: Task<Player?>? ->
+                result.success(task?.result?.playerId)
             }.addOnFailureListener {
-                result.error("error", it.localizedMessage, null)
-            }
+            result.error("error", it.localizedMessage, null)
+        }
     }
 
     private fun getPlayerName(result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         val activity = activity ?: return
+
         PlayGames.getPlayersClient(activity)
             .currentPlayer
-            .addOnSuccessListener { player ->
-                result.success(player.displayName)
+            .addOnCompleteListener { task: Task<Player?>? ->
+                result.success(task?.result?.displayName)
             }.addOnFailureListener {
                 result.error("error", it.localizedMessage, null)
             }
