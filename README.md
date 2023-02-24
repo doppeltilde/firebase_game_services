@@ -2,40 +2,42 @@
 
 [![Pub](https://img.shields.io/pub/v/firebase_game_services.svg?style=popout&include_prereleases)](https://pub.dartlang.org/packages/firebase_game_services)
 
-A Dart package, linking Google's Play Games and Apple's Game Center with Firebase.
+Dart package linking Google's Play Games and Apple's Game Center with Firebase.
+
+---
 
 ## Setup
 
-#### iOS Setup
+#### Apple Setup
 1. [Firebase iOS Setup](https://firebase.google.com/docs/flutter/setup?platform=ios).
 2. [Authenticate Using Game Center](https://firebase.google.com/docs/auth/ios/game-center).
 
 - [Apple Developer instructions](https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/GameKit_Guide/GameCenterOverview/GameCenterOverview.html#//apple_ref/doc/uid/TP40008304-CH5-SW22).
 - [Enabling and Configuring Game Center](https://developer.apple.com/documentation/gamekit/enabling_and_configuring_game_center).
 
-
-
-#### Android Setup
+#### Google Setup
 1. [Firebase Android Setup](https://firebase.google.com/docs/flutter/setup?platform=android).
 2. [Authenticate Using Google Play Games Services on Android](https://firebase.google.com/docs/auth/android/play-games).
 
+#### Minimum requirements
+Android `minSdkVersion >=19`
+iOS `>=12.0`
+macOS `>=12.0`
+
+---
+
 ## Usage
+
 #### Sign in
 Call this before making any other action.
 ```dart
-await FirebaseGameServices.signIn();
+await FirebaseGameServices.instance.signIn();
 ```
 
 #### Sign in linked user
 Signs in the currently linked user with native Game Service (Play Games on Android and GameCenter on iOS) to Firebase.
 ```dart
-await FirebaseGameServices.signInLinkedUser();
-```
-
-#### Sign out
-Signs out the user.
-```dart
-await FirebaseAuth.instance.signOut();
+await FirebaseGameServices.instance.signInLinkedUser();
 ```
 
 #### Save Game Data to Firebase
@@ -45,53 +47,43 @@ You can utilize both `Cloud Firestore` and/or `Realtime Database` for storing, s
 - [Get started with Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart).
 - [Get started with Realtime Database](https://firebase.google.com/docs/database/flutter/start).
 
-For static storage, I'd recommend using `Cloud Storage`.
+##### Firestore Example
+This example sets a value of `myValue` in a Firebase Firestore document with the current users ID as the document ID inside of a defined collection.
+```dart
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    try {
+        if (auth.currentUser != null) {
+        if (myValue == null || myValue.isEmpty) {
+            throw Exception('myValue cannot be null or empty');
+        }
+        
+        await firestore.collection("my-collection").doc(auth.currentUser!.uid).set(
+            {
+            "my-field": myValue,
+            },
+            SetOptions(merge: true),
+        );
+        } else {
+        throw Exception('User is not signed in');
+        }
+    } catch (e) {
+        debugPrint('Error: $e');
+    }
+```
+
+For static storage, I'd recommend using `Cloud Storage` or `PocketBase`.
 
 - [Get started with Cloud Storage](https://firebase.google.com/docs/storage/flutter/start).
+- [Get started with PocketBase](https://pocketbase.io).
 
 Of course you can also use your own backend.
-
-#### Save Game Data to iCloud and Google Drive
-Even though it is recommended to save game data to firebase, you can also utilize the players iCloud or Google Drive.
-
-##### Save Game
-Takes two parameters: `data` and a unique `name`.
-```dart
-final data = jsonEncode(GameData(96, "sword").toJson());
-final result = await FirebaseGameServices.saveGame(data: data, name: "foo");
-```
-
-*The `name` must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").*  
-
-
-##### Load game  
-Takes one parameter: `name`.
-
-```dart
-final result = await FirebaseGameServices.loadGame(name: "foo");
-if (result != null) {
-  final Map json = jsonDecode(result);
-  final gameData = GameData.fromJson(json);
-}
-```
-
-##### Delete game  
-Takes one parameter: `name`.
-```dart
-final result = await FirebaseGameServices.deleteGame(name: "foo");
-```
-
-##### Get saved games 
-To get all saved games.
-
-```dart
-final result = await FirebaseGameServices.getSavedGames();
-```
 
 #### Show leaderboards
 To show the leaderboards screen. It takes the leaderbord id for android and iOS.  
 ``` dart
-await FirebaseGameServices.showLeaderboards(iOSLeaderboardID: 'ios_leaderboard_id', androidLeaderboardID: 'android_leaderboard_id');
+await FirebaseGameServices.instance.showLeaderboards(iOSLeaderboardID: 'ios_leaderboard_id', androidLeaderboardID: 'android_leaderboard_id');
 ```   
 
 #### Submit score  
@@ -102,7 +94,7 @@ To submit a ```Score``` to specific leaderboard.
 -```value``` the score.  
 
 ``` dart
-await FirebaseGameServices.submitScore(
+await FirebaseGameServices.instance.submitScore(
 score: Score(
     androidLeaderboardID: 'android_leaderboard_id',
     iOSLeaderboardID: 'ios_leaderboard_id', 
@@ -120,40 +112,74 @@ The ```Achievement``` takes three parameters:
 -```steps``` the achievement steps for Android.
 
 ``` dart
-await FirebaseGameServices.unlock(
+await FirebaseGameServices.instance.unlock(
 achievement: Achievement(
     androidID: 'android_id', iOSID: 'ios_id',
     percentComplete: 100, steps: 2
     ),
-); 
-```  
+);
+```
 
+#### Show achievements
+```dart
+await FirebaseGameServices.instance.showAchievements();
+```
+
+#### Player Name
+To get the player name:
+```dart
+final playerName = await FirebaseGameServices.instance.getPlayerName();
+```
+
+#### Player Id
+To get the player id:
+```dart
+final playerId = await FirebaseGameServices.instance.getPlayerId();
+```
+
+#### Sign out
+Signs the user out (not recommended):
+```dart
+await FirebaseAuth.instance.signOut();
+```
+
+## Platform specific
 #### Increment (Android Only)  
 To increment the steps for android achievement.
 
 ```dart
-await FirebaseGameServices.increment(achievement: Achievement(androidID: 'android_id', steps: 50));
+await FirebaseGameServices.instance.increment(achievement: Achievement(androidID: 'android_id', steps: 50));
 ```  
 
 #### Show AccessPoint (iOS Only)  
 To show the access point you can call the following function:  
 
 ```dart
-await FirebaseGameServices.showAccessPoint(AccessPointLocation.topLeading);
+await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading);
 ```  
 
-This feature support only on the iOS, on Android there is nothing like this supported natively.  
-
-#### Hide AccessPoint (iOS Only)  
-To hide the access point.
+#### isUnderage (iOS Only)  
+Check if the player is underage.
 
 ```dart
-await FirebaseGameServices.hideAccessPoint();
-```  
-
-#### Player id  
-To get the player you can call:
-
-```dart
-final playerID = FirebaseGameServices.getPlayerID();
+await FirebaseGameServices.instance.isUnderage();
 ```
+
+#### isMultiplayerGamingRestricted (iOS Only)  
+Check if the player can join multiplayer games.
+
+```dart
+await FirebaseGameServices.instance.isMultiplayerGamingRestricted();
+```
+
+#### isPersonalizedCommunicationRestricted (iOS Only)  
+Check if the player can use personalized communication.
+
+```dart
+await FirebaseGameServices.instance.isPersonalizedCommunicationRestricted();
+```
+
+---
+
+*Notice:*
+*This package was initally created to be used in-house, as such the development is first and foremost aligned with the internal requirements.*

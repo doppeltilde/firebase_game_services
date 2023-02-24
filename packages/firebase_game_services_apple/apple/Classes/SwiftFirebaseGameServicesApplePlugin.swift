@@ -10,9 +10,7 @@ import FlutterMacOS
 #endif
 
 public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
-
-    // Mark - FlutterPlugin
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
             let arguments = call.arguments as? [String: Any]
             switch call.method {
@@ -37,9 +35,15 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     let location = (arguments?["location"] as? String) ?? ""
                     showAccessPoint(location: location)
                 case "getPlayerID":
-                    getPlayerID(result: result)
+                    getGamePlayerID(result: result)
                 case "getPlayerName":
                     getPlayerName(result: result)
+                case "isUnderage":
+                    isUnderage(result: result)
+                case "isMultiplayerGamingRestricted":
+                    isMultiplayerGamingRestricted(result: result)
+                case "isPersonalizedCommunicationRestricted":
+                    isPersonalizedCommunicationRestricted(result: result)
                 
                 case "signIn":
                     authenticateUser() { cred, error in
@@ -63,19 +67,6 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                         }
                         result(true)
                     }
-
-                case "saveGame":
-                    let data = (arguments?["data"] as? String) ?? ""
-                    let name = (arguments?["name"] as? String) ?? ""
-                    saveGame(name: name, data: data, result: result)
-                case "loadGame":
-                    let name = (arguments?["name"] as? String) ?? ""
-                    loadGame(name: name, result: result)
-                case "getSavedGames":
-                    getSavedGames(result: result)
-                case "deleteGame":
-                    let name = (arguments?["name"] as? String) ?? ""
-                    deleteGame(name: name, result: result)
 
                 default:
                     self.log(message: "Unknown method called")
@@ -233,7 +224,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     private func showLeaderboardWith(identifier: String) {
         let vc = GKGameCenterViewController()
         vc.gameCenterDelegate = self
-        vc.viewState = .achievements
+        vc.viewState = .leaderboards
         vc.leaderboardIdentifier = identifier
 
         #if os(iOS)
@@ -273,13 +264,19 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         achievement.percentComplete = percentComplete
         achievement.showsCompletionBanner = true
         GKAchievement.report([achievement]) { (error) in
-        guard error == nil else {
-            result(error?.localizedDescription ?? "")
-            return
-        }
-        result("success")
+            if let error = error {
+                let errorMessage = "Failed to report achievement: \(achievementID)"
+                DispatchQueue.main.async {
+                    result(errorMessage)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    result("success")
+                }
+            }
         }
     }
+
     
     // MARK: - AccessPoint
 
@@ -311,7 +308,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
 
     // MARK: - Game Player
 
-    private func getPlayerID(result: @escaping FlutterResult) {
+    private func getGamePlayerID(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
         let gamePlayerID = GKLocalPlayer.local.gamePlayerID
         result(gamePlayerID)
@@ -329,75 +326,25 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         }
     }
 
-    // MARK: - Save game
-    
-    func saveGame(name: String, data: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        guard let data = data.data(using: .utf8) else {
-        result("error")
-        return }
-        player.saveGameData(data, withName: name) { savedGame, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        result(nil)
-        }
+    private func isUnderage(result: @escaping FlutterResult) {
+        result(GKLocalPlayer.local.isUnderage)
     }
     
-    func getSavedGames(result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.fetchSavedGames(completionHandler: { savedGames, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        let items = savedGames?
-            .map({ SavedGame(name: $0.name ?? "",
-            modificationDate: UInt64($0.modificationDate?.timeIntervalSince1970 ?? 0),
-            deviceName: $0.deviceName ?? "") }) ?? []
-        if let data = try? JSONEncoder().encode(items) {
-            print(data)
-            let string = String(data: data, encoding: String.Encoding.utf8)
-            result(string)
+    private func isMultiplayerGamingRestricted(result: @escaping FlutterResult) {
+        if #available(iOS 13.0, *) {
+        result(GKLocalPlayer.local.isMultiplayerGamingRestricted)
         } else {
-            result("error")
+        let errorMessage = "The isMultiplayerGamingRestricted property is not supported on this version of iOS."
+        let flutterError = FlutterError(code: "not_supported", message: errorMessage, details: nil)
+        result(flutterError)
         }
-        })
     }
-    
-    func loadGame(name: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.fetchSavedGames(completionHandler: { savedGames, error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        
-        guard let item = savedGames?
-            .first(where: { $0.name == name }) else {
-            result("error")
-            return
-        }
-        item.loadData { data, error in
-            guard let data = data, error == nil else {
-            result("error")
-            return
-            }
-            let string = String(data: data, encoding: String.Encoding.utf8)
-            result(string)
-        }
-        })
-    }
-    
-    func deleteGame(name: String, result: @escaping FlutterResult) {
-        let player = GKLocalPlayer.local
-        player.deleteSavedGames(withName: name) { error in
-        guard error == nil else {
-            result("error")
-            return
-        }
-        result(nil)
+
+    func isPersonalizedCommunicationRestricted(result: @escaping FlutterResult) {
+        if #available(iOS 14.0, *) {
+        result(GKLocalPlayer.local.isPersonalizedCommunicationRestricted)
+        } else {
+        result("Not supported.")
         }
     }
 }
@@ -412,10 +359,4 @@ extension SwiftFirebaseGameServicesApplePlugin: GKGameCenterControllerDelegate {
       self.viewController.dismiss(true)
     #endif
   }
-}
-
-struct SavedGame: Codable {
-  var name: String
-  var modificationDate: UInt64
-  var deviceName: String
 }

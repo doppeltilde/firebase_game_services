@@ -1,3 +1,15 @@
+## 2.0.0
+##### Breaking Changes!
+* `FirebaseGameServices.` is now `FirebaseGameServices.instance.`
+* `getPlayerID` is now `getPlayerId`
+* iCloud and Google Drive saves were removed due to technical debt and being out of scope.
+* Migrated to Play Games Services **v2**.
+* Bumped dependencies and got rid of bugs.
+
+## 1.0.4
+* Fix native crash caused by callback error.
+* Bumped dependencies.
+
 ## 1.0.3
 - Bumped dependencies.
 
