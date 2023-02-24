@@ -20,7 +20,7 @@ Dart package linking Google's Play Games and Apple's Game Center with Firebase.
 2. [Authenticate Using Google Play Games Services on Android](https://firebase.google.com/docs/auth/android/play-games).
 
 #### Minimum requirements
-Android `minSdkVersion >=23`
+Android `minSdkVersion >=19`
 iOS `>=12.0`
 macOS `>=12.0`
 
