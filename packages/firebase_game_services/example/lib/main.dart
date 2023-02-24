@@ -68,6 +68,29 @@ class _MyAppState extends State<MyApp> {
                       print(name);
                     },
                     child: const Text("Player Name")),
+                ElevatedButton(
+                    onPressed: () async {
+                      var isUnderage =
+                          await FirebaseGameServices.instance.isUnderage();
+                      print(isUnderage);
+                    },
+                    child: const Text("isUnderage")),
+                ElevatedButton(
+                    onPressed: () async {
+                      var isMultiplayerGamingRestricted =
+                          await FirebaseGameServices.instance
+                              .isMultiplayerGamingRestricted();
+                      print(isMultiplayerGamingRestricted);
+                    },
+                    child: const Text("isMultiplayerGamingRestricted")),
+                ElevatedButton(
+                    onPressed: () async {
+                      var isPersonalizedCommunicationRestricted =
+                          await FirebaseGameServices.instance
+                              .isPersonalizedCommunicationRestricted();
+                      print(isPersonalizedCommunicationRestricted);
+                    },
+                    child: const Text("isPersonalizedCommunicationRestricted")),
               ]),
         ),
       ),

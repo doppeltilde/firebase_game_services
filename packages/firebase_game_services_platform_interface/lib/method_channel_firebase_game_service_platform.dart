@@ -150,4 +150,23 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   Future<String?> getPlayerName() async {
     return await _channel.invokeMethod("getPlayerName");
   }
+
+  /// Check if player is underage (always false on Android).
+  @override
+  Future<bool?> isUnderage() async {
+    return await _channel.invokeMethod("isUnderage");
+  }
+
+  /// Check if player is restricted from joining multiplayer games (always false on Android).
+  @override
+  Future<bool?> isMultiplayerGamingRestricted() async {
+    return await _channel.invokeMethod("isMultiplayerGamingRestricted");
+  }
+
+  /// Check if player is restricted from using personalized communication on
+  /// the device (always false on Android).
+  @override
+  Future<bool?> isPersonalizedCommunicationRestricted() async {
+    return await _channel.invokeMethod("isPersonalizedCommunicationRestricted");
+  }
 }

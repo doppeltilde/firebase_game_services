@@ -153,11 +153,25 @@ To show the access point you can call the following function:
 await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading);
 ```  
 
-#### Hide AccessPoint (iOS Only)  
-To hide the access point.
+#### isUnderage (iOS Only)  
+Check if the player is underage.
 
 ```dart
-await FirebaseGameServices.instance.hideAccessPoint();
+await FirebaseGameServices.instance.isUnderage();
+```
+
+#### isMultiplayerGamingRestricted (iOS Only)  
+Check if the player can join multiplayer games.
+
+```dart
+await FirebaseGameServices.instance.isMultiplayerGamingRestricted();
+```
+
+#### isPersonalizedCommunicationRestricted (iOS Only)  
+Check if the player can use personalized communication.
+
+```dart
+await FirebaseGameServices.instance.isPersonalizedCommunicationRestricted();
 ```
 
 ---

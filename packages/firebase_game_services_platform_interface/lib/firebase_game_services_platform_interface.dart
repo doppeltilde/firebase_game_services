@@ -117,4 +117,20 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   Future<String?> getPlayerName() async {
     throw UnimplementedError("not implemented.");
   }
+
+  /// Check if player is underage (always false on Android).
+  Future<bool?> isUnderage() async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Check if player is restricted from joining multiplayer games (always false on Android).
+  Future<bool?> isMultiplayerGamingRestricted() async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Check if player is restricted from using personalized communication on
+  /// the device (always false on Android).
+  Future<bool?> isPersonalizedCommunicationRestricted() async {
+    throw UnimplementedError("not implemented.");
+  }
 }

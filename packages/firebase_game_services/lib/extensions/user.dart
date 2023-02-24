@@ -12,4 +12,17 @@ extension FirebaseGameServicesUser on FirebaseGameServices {
   Future<String?> getPlayerName() async {
     return await FirebaseGameServices.platform.getPlayerName();
   }
+
+  Future<bool?> isUnderage() async {
+    return await FirebaseGameServices.platform.isUnderage();
+  }
+
+  Future<bool?> isMultiplayerGamingRestricted() async {
+    return await FirebaseGameServices.platform.isMultiplayerGamingRestricted();
+  }
+
+  Future<bool?> isPersonalizedCommunicationRestricted() async {
+    return await FirebaseGameServices.platform
+        .isPersonalizedCommunicationRestricted();
+  }
 }

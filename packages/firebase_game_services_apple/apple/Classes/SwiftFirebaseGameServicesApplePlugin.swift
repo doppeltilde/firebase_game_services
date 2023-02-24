@@ -38,15 +38,12 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     getGamePlayerID(result: result)
                 case "getPlayerName":
                     getPlayerName(result: result)
-
-                // TODO: Implement
                 case "isUnderage":
                     isUnderage(result: result)
                 case "isMultiplayerGamingRestricted":
                     isMultiplayerGamingRestricted(result: result)
-                case "playerIsPersonalizedCommunicationRestricted":
+                case "isPersonalizedCommunicationRestricted":
                     isPersonalizedCommunicationRestricted(result: result)
-                // END TODO
                 
                 case "signIn":
                     authenticateUser() { cred, error in
