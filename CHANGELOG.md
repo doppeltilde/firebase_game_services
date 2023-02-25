@@ -1,3 +1,6 @@
+## 2.0.2
+* Added `showHighlights` to Accesspoint.
+
 ## 2.0.1
 ##### Breaking Changes!
 * `FirebaseGameServices.` is now `FirebaseGameServices.instance.`

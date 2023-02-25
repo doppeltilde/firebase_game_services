@@ -119,31 +119,31 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.0.1"
+    version: "2.0.2"
   firebase_game_services_apple:
     dependency: transitive
     description:
       name: firebase_game_services_apple
-      sha256: "73d128c8be6ee7e3462dbeccf4a950ea7d67b85ae48cfb837d09a9713e36932e"
+      sha256: "7a4572275b9960302260196327c88d86b4d12e860a7216535bcb04bcf2ccf33e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.2"
   firebase_game_services_google:
     dependency: transitive
     description:
       name: firebase_game_services_google
-      sha256: "9b372926d39bb3e2aa8d52886bd6594ca8672c27e0641ccef2f916cf50702d18"
+      sha256: "8f4fbe7582ded7dffeeb54e227d00935d4a59d7d6343df64ea7ea3c9e3e94d2d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.2"
   firebase_game_services_platform_interface:
     dependency: transitive
     description:
       name: firebase_game_services_platform_interface
-      sha256: "69ec5b6496ca35a0c1d9effe828f45820231a48bdff892d03872437907b4c9e6"
+      sha256: dad5e6d96f3e14caa925e3dfbba7796f7b2d256162515c24ed56434aca04e6b4
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.2"
   flutter:
     dependency: "direct main"
     description: flutter

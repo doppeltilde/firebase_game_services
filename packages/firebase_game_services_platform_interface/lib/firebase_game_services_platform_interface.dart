@@ -74,7 +74,10 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   }
 
   /// Show the iOS Access Point.
-  Future<String?> showAccessPoint(AccessPointLocation location) async {
+  Future<String?> showAccessPoint(
+    AccessPointLocation location, {
+    bool? showHighlights,
+  }) async {
     throw UnimplementedError("not implemented.");
   }
 

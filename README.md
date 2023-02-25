@@ -151,28 +151,33 @@ To increment the steps for android achievement.
 await FirebaseGameServices.instance.increment(achievement: Achievement(androidID: 'android_id', steps: 50));
 ```  
 
-#### Show AccessPoint (iOS Only)  
-To show the access point you can call the following function:  
+#### Show AccessPoint (Apple Only)  
 
 ```dart
-await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading);
+await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading, showHighlights: true);
+```
+
+#### Hide AccessPoint (Apple Only)    
+
+```dart
+await FirebaseGameServices.instance.hideAccessPoint();
 ```  
 
-#### isUnderage (iOS Only)  
+#### isUnderage (Apple Only)  
 Check if the player is underage.
 
 ```dart
 await FirebaseGameServices.instance.isUnderage();
 ```
 
-#### isMultiplayerGamingRestricted (iOS Only)  
+#### isMultiplayerGamingRestricted (Apple Only)  
 Check if the player can join multiplayer games.
 
 ```dart
 await FirebaseGameServices.instance.isMultiplayerGamingRestricted();
 ```
 
-#### isPersonalizedCommunicationRestricted (iOS Only)  
+#### isPersonalizedCommunicationRestricted (Apple Only)  
 Check if the player can use personalized communication.
 
 ```dart

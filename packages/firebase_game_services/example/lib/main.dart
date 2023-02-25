@@ -91,8 +91,10 @@ class _MyAppState extends State<MyApp> {
                     child: const Text("Unlock Achievement")),
                 ElevatedButton(
                     onPressed: () async {
-                      await FirebaseGameServices.instance
-                          .showAccessPoint(AccessPointLocation.topLeading);
+                      await FirebaseGameServices.instance.showAccessPoint(
+                        AccessPointLocation.topLeading,
+                        showHighlights: true,
+                      );
                     },
                     child: const Text("Show Accesspoint")),
                 ElevatedButton(

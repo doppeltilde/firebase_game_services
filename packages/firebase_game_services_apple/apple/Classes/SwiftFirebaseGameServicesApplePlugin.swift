@@ -30,10 +30,11 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                     showLeaderboardWith(identifier: leaderboardID)
                     result("success")
                 case "hideAccessPoint":
-                    hideAccessPoint()
+                    hideAccessPoint(result: result)
                 case "showAccessPoint":
                     let location = (arguments?["location"] as? String) ?? ""
-                    showAccessPoint(location: location)
+                    let showHighlights = (arguments?["showHighlights"] as? Bool) ?? false
+                    showAccessPoint(location: location, showHighlights: showHighlights, result: result)
                 case "getPlayerID":
                     getGamePlayerID(result: result)
                 case "getPlayerName":
@@ -280,7 +281,7 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     
     // MARK: - AccessPoint
 
-    private func showAccessPoint(location: String) {
+    private func showAccessPoint(location: String, showHighlights: Bool, result: @escaping FlutterResult) {
         if #available(iOS 14.0, *) {
         var gkLocation: GKAccessPoint.Location = .topLeading
         switch location {
@@ -295,14 +296,21 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
         default:
             break
         }
+        GKAccessPoint.shared.showHighlights = showHighlights
         GKAccessPoint.shared.location = gkLocation
         GKAccessPoint.shared.isActive = true
+        result(nil)
+        } else {
+        result("Not supported.")
         }
     }
   
-    private func hideAccessPoint() {
+    private func hideAccessPoint(result: @escaping FlutterResult) {
         if #available(iOS 14.0, *) {
-        GKAccessPoint.shared.isActive = false
+            GKAccessPoint.shared.isActive = false
+            result(nil)
+        } else {
+            result("Not supported.")
         }
     }
 
