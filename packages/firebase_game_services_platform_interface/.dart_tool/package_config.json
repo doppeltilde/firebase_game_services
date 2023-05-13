@@ -209,10 +209,10 @@
       "name": "firebase_game_services_platform_interface",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "2.18"
     }
   ],
-  "generated": "2023-05-13T10:29:16.894374Z",
+  "generated": "2023-05-13T10:34:52.271581Z",
   "generator": "pub",
   "generatorVersion": "3.1.0-107.0.dev"
 }
