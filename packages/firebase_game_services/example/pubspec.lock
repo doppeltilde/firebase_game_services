@@ -132,10 +132,10 @@ packages:
     dependency: transitive
     description:
       name: firebase_game_services_google
-      sha256: cfab7b89585ca01df34ea40a76c3d3b7567fbbfcf10bd9c2430e9622bed65efd
+      sha256: "81245e80419094b119cd09ebdae502bf433d03d2d3352017ec68fd3a1c1b0b2c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.0+1"
   firebase_game_services_platform_interface:
     dependency: transitive
     description:
