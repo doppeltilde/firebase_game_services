@@ -1,3 +1,13 @@
+## 2.1.0
+
+- Fix `Namespace not specified`.
+- Bumped firebase_auth to `^4.6.1`.
+- Bumped play-services-auth to `^20.5.0`.
+- Bumped firebase-auth to `^22.0.0`.
+- Bumped gradle to `^8.0.1`.
+- Bumped sdk to `>=2.18.0`.
+- Bumped flutter to `>=3.0.0`.
+
 ## 2.0.3
 
 - Bumped dependencies.
