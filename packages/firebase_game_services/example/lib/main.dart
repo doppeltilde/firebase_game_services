@@ -70,6 +70,35 @@ class _MyAppState extends State<MyApp> {
                     child: const Text("Player Name")),
                 ElevatedButton(
                     onPressed: () async {
+                      await FirebaseGameServices.instance.submitScore(
+                          score: Score(
+                        androidLeaderboardID: 'android_leaderboard_id',
+                        iOSLeaderboardID: 'ios_leaderboard_id',
+                        value: 5,
+                      ));
+                    },
+                    child: const Text("Submit Score")),
+                ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseGameServices.instance.unlock(
+                        achievement: Achievement(
+                            androidID: 'android_id',
+                            iOSID: 'ios_id',
+                            percentComplete: 100,
+                            steps: 2),
+                      );
+                    },
+                    child: const Text("Unlock Achievement")),
+                ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseGameServices.instance.showAccessPoint(
+                        AccessPointLocation.topLeading,
+                        showHighlights: true,
+                      );
+                    },
+                    child: const Text("Show Accesspoint")),
+                ElevatedButton(
+                    onPressed: () async {
                       var isUnderage =
                           await FirebaseGameServices.instance.isUnderage();
                       print(isUnderage);

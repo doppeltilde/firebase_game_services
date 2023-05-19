@@ -47,9 +47,14 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   }
 
   @override
-  Future<String?> showAccessPoint(AccessPointLocation location) async {
-    return await _channel.invokeMethod(
-        "showAccessPoint", {"location": location.toString().split(".").last});
+  Future<String?> showAccessPoint(
+    AccessPointLocation location, {
+    bool? showHighlights,
+  }) async {
+    return await _channel.invokeMethod("showAccessPoint", {
+      "location": location.toString().split(".").last,
+      "showHighlights": showHighlights,
+    });
   }
 
   @override

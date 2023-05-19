@@ -1,5 +1,4 @@
 import 'package:firebase_game_services/firebase_game_services.dart';
-import 'package:firebase_game_services_platform_interface/firebase_game_services_platform_interface.dart';
 
 extension FirebaseGameServicesAchievements on FirebaseGameServices {
   /// Unlock an [achievement].
@@ -46,8 +45,12 @@ extension FirebaseGameServicesAchievements on FirebaseGameServices {
   }
 
   /// Show the iOS Access Point.
-  Future<String?> showAccessPoint(AccessPointLocation location) async {
-    return await FirebaseGameServices.platform.showAccessPoint(location);
+  Future<String?> showAccessPoint(
+    AccessPointLocation location, {
+    bool showHighlights = false,
+  }) async {
+    return await FirebaseGameServices.platform
+        .showAccessPoint(location, showHighlights: showHighlights);
   }
 
   /// Hide the iOS Access Point.
