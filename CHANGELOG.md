@@ -1,3 +1,7 @@
+## 2.1.1
+
+- Fix Android implementation.
+
 ## 2.1.0
 
 - Fix `Namespace not specified`.

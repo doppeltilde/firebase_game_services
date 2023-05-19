@@ -1,6 +1,6 @@
 name: firebase_game_services
 description: A Flutter package, linking Google's Play Games and Apple's Game Center with Firebase.
-version: 2.1.0
+version: 2.1.1
 homepage: https://github.com/jonafeucht/firebase_game_services
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
   #  path: ../firebase_game_services_platform_interface/
   firebase_game_services_apple: ^2.1.0
   #  path: ../firebase_game_services_apple/
-  firebase_game_services_google: ^2.1.0
+  firebase_game_services_google: ^2.1.1
   # path: ../firebase_game_services_google/
 
 dev_dependencies:
