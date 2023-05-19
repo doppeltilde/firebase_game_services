@@ -1,6 +1,6 @@
 name: firebase_game_services_google
 description: The Google implementation of firebase_game_services.
-version: 2.1.1
+version: 2.1.2
 homepage: https://github.com/jonafeucht/firebase_game_services
 
 environment:

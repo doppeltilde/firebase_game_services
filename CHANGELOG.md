@@ -1,6 +1,6 @@
-## 2.1.1
+## 2.1.2
 
-- Fix Android implementation.
+- Fixed Android implementation.
 
 ## 2.1.0
 
