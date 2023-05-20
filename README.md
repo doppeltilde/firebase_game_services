@@ -19,6 +19,8 @@ Dart package linking Google's Play Games and Apple's Game Center with Firebase.
 1. [Firebase Android Setup](https://firebase.google.com/docs/flutter/setup?platform=android).
 2. [Authenticate Using Google Play Games Services on Android](https://firebase.google.com/docs/auth/android/play-games).
 
+If you continue to encounter difficulties, kindly refer to the following discussion for further assistance: https://github.com/jonafeucht/firebase_game_services/discussions/10#discussioncomment-5946349.
+
 #### Minimum requirements
 Android `minSdkVersion >=19`
 iOS `>=12.0`
