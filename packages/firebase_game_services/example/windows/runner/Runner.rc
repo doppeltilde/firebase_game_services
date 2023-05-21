@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "keew.ee" "\0"
+            VALUE "CompanyName", "tiltedcu.be" "\0"
             VALUE "FileDescription", "firebase_game_services_example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "firebase_game_services_example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 keew.ee. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 tiltedcu.be. All rights reserved." "\0"
             VALUE "OriginalFilename", "firebase_game_services_example.exe" "\0"
             VALUE "ProductName", "firebase_game_services_example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

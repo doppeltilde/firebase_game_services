@@ -1,4 +1,4 @@
-package keew.ee.firebase_game_services_google
+package tiltedcu.be.firebase_game_services_google
 
 enum class PluginError {
   failedToSendScore, failedToGetScore, failedToGetPlayerId, failedToGetPlayerName,

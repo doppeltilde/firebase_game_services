@@ -15,8 +15,8 @@ dependencies:
   #  path: ../firebase_game_services_platform_interface/
   firebase_game_services_apple: ^2.1.0
   #  path: ../firebase_game_services_apple/
-  firebase_game_services_google: ^2.1.3
-  # path: ../firebase_game_services_google/
+  firebase_game_services_google: #^2.1.3
+   path: ../firebase_game_services_google/
 
 dev_dependencies:
   flutter_test:
