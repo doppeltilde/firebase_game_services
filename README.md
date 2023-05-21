@@ -85,7 +85,7 @@ Of course you can also use your own backend.
 
 #### Show all leaderboards
 
-Shows all leaderboards screen.
+Shows all leaderboards.
 
 ```dart
 await FirebaseGameServices.instance.showAllLeaderboards();
@@ -93,7 +93,7 @@ await FirebaseGameServices.instance.showAllLeaderboards();
 
 #### Show single leaderboard
 
-To show the leaderboards screen. It takes the leaderbord id for android and iOS.
+Shows a single leaderboard.
 
 ```dart
 await FirebaseGameServices.instance.showSingleLeaderboard(iOSLeaderboardID: 'ios_leaderboard_id', androidLeaderboardID: 'android_leaderboard_id');
@@ -158,14 +158,6 @@ To get the player id:
 
 ```dart
 final playerId = await FirebaseGameServices.instance.getPlayerId();
-```
-
-#### Sign out
-
-Signs the user out (not recommended):
-
-```dart
-await FirebaseAuth.instance.signOut();
 ```
 
 ## Platform specific
