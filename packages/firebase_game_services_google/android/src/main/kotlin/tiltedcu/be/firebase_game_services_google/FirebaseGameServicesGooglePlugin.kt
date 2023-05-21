@@ -83,7 +83,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     }
 
     private fun handleSignInResult(result: Result) {
-        val activity = this.activity!!
+        val activity = activity ?: return
 
             achievementClient = PlayGames.getAchievementsClient(activity)
             leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
@@ -342,7 +342,8 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val signInAccount = result?.signInAccount
 
         if (result?.isSuccess == true && signInAccount != null) {
-            PlayGames.getGamesSignInClient(activity!!).signIn()
+            gamesClient?.setViewForPopups(activity!!.findViewById(android.R.id.content))
+            gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         } else {
             finishPendingOperationWithError(ApiException(result?.status ?: Status(0)))
         }
