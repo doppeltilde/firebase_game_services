@@ -6,9 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.Gravity
 import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.games.*
@@ -25,14 +23,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
-
 private const val CHANNEL_NAME = "firebase_game_services"
 private const val RC_SIGN_IN = 9000
 
 class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) : FlutterPlugin,
     MethodChannel.MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
 
-    private var googleSignInClient: GoogleSignInClient? = null
     private var achievementClient: AchievementsClient? = null
     private var leaderboardsClient: LeaderboardsClient? = null
     private var activityPluginBinding: ActivityPluginBinding? = null
@@ -112,33 +108,60 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
 
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
-        gamesSignInClient
-            .requestServerSideAccess(
-                authCode,  /*forceRefreshToken=*/
-                false
-            )
-            .addOnCompleteListener { task: Task<String?> ->
-                if (task.isSuccessful) {
-                    Log.i("Result1: ", task.result.toString())
 
-                    val serverAuthToken = task.result
-                    val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
-                    auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { result ->
-                        if (result.isSuccessful) {
-                            Log.i("Result2: ", result.toString())
-                          //  finishPendingOperationWithSuccess()
+        gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val serverAuthToken = task.result
+                Log.d("serverAuthToken", serverAuthToken)
+                val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
+
+                auth.signInWithCredential(credential).addOnCompleteListener { task2 ->
+                    Log.d("Success", task2.result.toString())
+                    val user = auth.currentUser
+                    Log.d("user: ", user.toString())
+
+                    // Fix: Crash! java.lang.NullPointerException
+                    pendingOperation!!.result.success(true)
+                    pendingOperation = null;
+
+                }
+            } else {
+                gamesSignInClient
+                    .requestServerSideAccess(
+                        authCode,  /*forceRefreshToken=*/
+                        false
+                    )
+                    .addOnCompleteListener { task: Task<String?> ->
+                        if (task.isSuccessful) {
+                            Log.i("Result1: ", task.result.toString())
+
+                            val serverAuthToken = task.result
+
+                            val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
+                            auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { result ->
+                                Log.i("isSuccess", result.isSuccessful.toString())
+                                Log.i("serverAuthToken: ", serverAuthToken.toString())
+                                Log.i("credential: ", credential.toString())
+                                Log.i("Result2: ", result.toString())
+                                if (result.isSuccessful) {
+                                    Log.i("serverAuthToken: ", serverAuthToken.toString())
+                                    Log.i("credential: ", credential.toString())
+                                    Log.i("Result2: ", result.toString())
+                                    //  finishPendingOperationWithSuccess()
+                                } else {
+
+                                }
+                            }
+
+
+                            // Send authentication code to the backend game server to be
+                            // exchanged for an access token and used to verify the
+                            // player via the Play Games Services REST APIs.
                         } else {
-
+                            // Failed to retrieve authentication code.
                         }
                     }
-
-
-                    // Send authentication code to the backend game server to be
-                    // exchanged for an access token and used to verify the
-                    // player via the Play Games Services REST APIs.
-                } else {
-                    // Failed to retrieve authentication code.
-                }
+            }
             }
     }
 
@@ -265,6 +288,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         setupChannel(binding.binaryMessenger)
         context = binding.applicationContext
         PlayGamesSdk.initialize(context)
+        Log.i("LOG: ", "onAttachedToEngine")
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -307,9 +331,13 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private class PendingOperation constructor(val method: String, val result: Result)
 
     private fun finishPendingOperationWithSuccess() {
-        Log.i(pendingOperation!!.method, "success")
-        pendingOperation!!.result.success(true)
-        pendingOperation = null
+        if (pendingOperation != null) {
+            Log.d(pendingOperation!!.method, "success")
+            pendingOperation!!.result.success(true)
+            pendingOperation = null
+        } else {
+            Log.d("pendingOperation", pendingOperation.toString())
+        }
     }
 
     private fun finishPendingOperationWithError(exception: Exception) {
