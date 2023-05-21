@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.Gravity
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
@@ -86,6 +87,9 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
             achievementClient = PlayGames.getAchievementsClient(activity)
             leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
+
+            gamesClient?.setViewForPopups(activity.findViewById(android.R.id.content))
+            gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
 
             if (method == Methods.signIn) {
                 signInFirebaseWithPlayGames(result)

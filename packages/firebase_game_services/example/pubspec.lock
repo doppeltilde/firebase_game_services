@@ -119,20 +119,22 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.2.0"
+    version: "2.2.0-beta.1"
   firebase_game_services_apple:
     dependency: transitive
     description:
-      path: "../../firebase_game_services_apple"
-      relative: true
-    source: path
-    version: "2.2.0"
+      name: firebase_game_services_apple
+      sha256: "2a5690819c46669250bc6658aea2dd7fedaa43c42bb669f0ea53073c1ba2c94d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0-beta.1"
   firebase_game_services_google:
     dependency: transitive
     description:
-      path: "../../firebase_game_services_google"
-      relative: true
-    source: path
+      name: firebase_game_services_google
+      sha256: "828d9db129b7f199d51cec5eb07e1a3a9de45eca67cbc730fd55ef25149531fd"
+      url: "https://pub.dev"
+    source: hosted
     version: "2.2.0-beta.1"
   firebase_game_services_platform_interface:
     dependency: transitive
