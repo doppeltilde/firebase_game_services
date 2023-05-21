@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.view.Gravity
 import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.games.*
@@ -31,6 +29,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     private var achievementClient: AchievementsClient? = null
     private var leaderboardsClient: LeaderboardsClient? = null
+    private var gamesClient: GamesClient? = null
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var channel: MethodChannel? = null
     private var pendingOperation: PendingOperation? = null
@@ -58,144 +57,100 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         }
     }
 
-    private fun silentSignIn() {
+    private fun silentSignIn(result: Result) {
         val activity = activity ?: return
 
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
 
+        // Doc Ref: https://developers.google.com/games/services/android/signin#remove_sign-in_and_sign-out_calls
         gamesSignInClient.isAuthenticated.addOnCompleteListener { isAuthenticatedTask ->
             val isAuthenticated = isAuthenticatedTask.isSuccessful &&
                     isAuthenticatedTask.result.isAuthenticated
             if (isAuthenticated) {
-                Log.i("AUTH: ", isAuthenticatedTask.result.toString())
-
-                handleSignInResult()
-
-
+                Log.d("AUTH: ", isAuthenticatedTask.result.toString())
+                handleSignInResult(result)
             } else {
-                // Disable your integration with Play Games Services or show a
-                // login button to ask  players to sign-in. Clicking it should
-                // call GamesSignInClient.signIn().
                 gamesSignInClient.signIn().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                      
+                        handleSignInResult(result)
                     } else {
-                        // Player will need to sign-in explicitly using via UI
-                        // prompt
+                        Log.e("Error: ", task.exception.toString())
                     }
                 }
             }
         }
     }
 
-    private fun handleSignInResult() {
+    private fun handleSignInResult(result: Result) {
         val activity = this.activity!!
 
-        achievementClient = PlayGames.getAchievementsClient(activity)
-        leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
+            achievementClient = PlayGames.getAchievementsClient(activity)
+            leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
 
             if (method == Methods.signIn) {
-                signInFirebaseWithPlayGames()
+                signInFirebaseWithPlayGames(result)
             } else if (method == Methods.signInLinkedUser) {
-
+                signInFirebaseWithPlayGames(result)
             }
     }
 
-    private fun signInFirebaseWithPlayGames() {
+    private fun signInFirebaseWithPlayGames(result: Result) {
         val auth = FirebaseAuth.getInstance()
         val activity = this.activity!!
 
         val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
+        val playersClient = PlayGames.getPlayersClient(activity)
 
+        // Doc Ref: https://developers.google.com/games/services/android/signin#request_server_side_access
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
-
         gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val serverAuthToken = task.result
                 Log.d("serverAuthToken", serverAuthToken)
+                val playerId = playersClient.currentPlayerId
+
                 val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
 
                 auth.signInWithCredential(credential).addOnCompleteListener { task2 ->
-                    Log.d("Success", task2.result.toString())
-                    val user = auth.currentUser
-                    Log.d("user: ", user.toString())
-
-                    // Fix: Crash! java.lang.NullPointerException
-                    pendingOperation!!.result.success(true)
-                    pendingOperation = null;
-
+                    Log.d("Success: ", task2.result.toString())
+                    Log.d("playerId: ", playerId.toString())
+                    result.success(true)
                 }
             } else {
-                gamesSignInClient
-                    .requestServerSideAccess(
-                        authCode,  /*forceRefreshToken=*/
-                        false
-                    )
-                    .addOnCompleteListener { task: Task<String?> ->
+                gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task: Task<String?> ->
                         if (task.isSuccessful) {
-                            Log.i("Result1: ", task.result.toString())
+                            Log.d("Result1: ", task.result.toString())
 
                             val serverAuthToken = task.result
 
                             val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
-                            auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { result ->
-                                Log.i("isSuccess", result.isSuccessful.toString())
-                                Log.i("serverAuthToken: ", serverAuthToken.toString())
-                                Log.i("credential: ", credential.toString())
-                                Log.i("Result2: ", result.toString())
-                                if (result.isSuccessful) {
-                                    Log.i("serverAuthToken: ", serverAuthToken.toString())
-                                    Log.i("credential: ", credential.toString())
-                                    Log.i("Result2: ", result.toString())
-                                    //  finishPendingOperationWithSuccess()
-                                } else {
+                            auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { task2 ->
+                                Log.d("isSuccess", task2.isSuccessful.toString())
+                                Log.d("serverAuthToken: ", serverAuthToken.toString())
+                                Log.d("credential: ", credential.toString())
+                                Log.d("Result2: ", task2.toString())
+                                if (task2.isSuccessful) {
 
+                                    Log.d("serverAuthToken: ", serverAuthToken.toString())
+                                    Log.d("credential: ", credential.toString())
+                                    Log.d("Result2: ", task2.result.toString())
+
+                                    result.success(true)
+                                } else {
+                                    Log.e("Error:", task2.exception.toString())
+                                    result.success(false)
                                 }
                             }
-
-
-                            // Send authentication code to the backend game server to be
-                            // exchanged for an access token and used to verify the
-                            // player via the Play Games Services REST APIs.
                         } else {
                             // Failed to retrieve authentication code.
+                            Log.e("Error:", task.exception.toString())
+                            result.success(false)
+
+
                         }
                     }
             }
             }
-    }
-
-    private fun linkCredentialsFirebaseWithPlayGames(acct: GoogleSignInAccount) {
-        val auth = FirebaseAuth.getInstance()
-
-        val currentUser = auth.currentUser ?: throw  Exception("current_user_null")
-
-        val authCode = acct.serverAuthCode ?: throw Exception("auth_code_null")
-
-        val credential = PlayGamesAuthProvider.getCredential(authCode)
-
-        currentUser.linkWithCredential(credential).addOnCompleteListener { result ->
-            if (result.isSuccessful) {
-                finishPendingOperationWithSuccess()
-            } else {
-                if (result.exception is FirebaseAuthException) {
-                    if ((result.exception as FirebaseAuthException).errorCode == "ERROR_CREDENTIAL_ALREADY_IN_USE" && forceSignInIfCredentialAlreadyUsed) {
-                        method = Methods.signIn
-                        silentSignIn()
-                    } else {
-                        finishPendingOperationWithError(
-                            result.exception
-                                ?: Exception("linkWithCredential failed")
-                        )
-                    }
-                } else {
-                    finishPendingOperationWithError(
-                        result.exception
-                            ?: Exception("linkWithCredential failed")
-                    )
-                }
-            }
-        }
     }
     //endregion
 
@@ -229,7 +184,17 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         }
     }
 
-    private fun showLeaderboards(leaderboardID: String, result: Result) {
+    private fun showAllLeaderboards(result: Result) {
+        showLoginErrorIfNotLoggedIn(result)
+        leaderboardsClient?.allLeaderboardsIntent?.addOnSuccessListener { intent ->
+            activity?.startActivityForResult(intent, 0)
+            result.success("success")
+        }?.addOnFailureListener {
+            result.error("error", it.localizedMessage, null)
+        }
+    }
+
+    private fun showSingleLeaderboard(leaderboardID: String, result: Result) {
         showLoginErrorIfNotLoggedIn(result)
         leaderboardsClient?.getLeaderboardIntent(leaderboardID)?.addOnSuccessListener { intent ->
             activity?.startActivityForResult(intent, 0)
@@ -331,13 +296,9 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private class PendingOperation constructor(val method: String, val result: Result)
 
     private fun finishPendingOperationWithSuccess() {
-        if (pendingOperation != null) {
-            Log.d(pendingOperation!!.method, "success")
-            pendingOperation!!.result.success(true)
-            pendingOperation = null
-        } else {
-            Log.d("pendingOperation", pendingOperation.toString())
-        }
+        Log.i(pendingOperation?.method, "success")
+        pendingOperation?.result?.success(true)
+        pendingOperation = null
     }
 
     private fun finishPendingOperationWithError(exception: Exception) {
@@ -371,18 +332,15 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     //region ActivityResultListener
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == RC_SIGN_IN) {
+
         val result = data?.let { Auth.GoogleSignInApi.getSignInResultFromIntent(it) }
 
         val signInAccount = result?.signInAccount
 
         if (result?.isSuccess == true && signInAccount != null) {
-            handleSignInResult()
+            PlayGames.getGamesSignInClient(activity!!).signIn()
         } else {
             finishPendingOperationWithError(ApiException(result?.status ?: Status(0)))
-            var message = result?.status?.statusMessage ?: ""
-            if (message.isEmpty()) {
-            message = "Something went wrong " + result?.status
-            }
         }
         return true
         }
@@ -405,9 +363,12 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 val score = call.argument<Int>("value") ?: 0
                 submitScore(leaderboardID, score, result)
             }
-            Methods.showLeaderboards -> {
+            Methods.showAllLeaderboards -> {
+                showAllLeaderboards(result)
+            }
+            Methods.showSingleLeaderboard -> {
                 val leaderboardID = call.argument<String>("leaderboardID") ?: ""
-                showLeaderboards(leaderboardID, result)
+                showSingleLeaderboard(leaderboardID, result)
             }
             Methods.showAchievements -> {
                 showAchievements(result)
@@ -415,16 +376,14 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             Methods.signIn -> {
                 method = Methods.signIn
                 clientId = call.argument<String>("client_id")
-                gResult = result
-                silentSignIn()
+                silentSignIn(result)
             }
             Methods.signInLinkedUser -> {
                 method = Methods.signInLinkedUser
                 clientId = call.argument<String>("client_id")
                 forceSignInIfCredentialAlreadyUsed =
                     call.argument<Boolean>("force_sign_in_credential_already_used") == true
-                gResult = result
-                silentSignIn()
+                silentSignIn(result)
             }
             Methods.getPlayerID -> {
                 getPlayerID(result)
@@ -443,7 +402,8 @@ object Methods {
     const val unlock = "unlock"
     const val increment = "increment"
     const val submitScore = "submitScore"
-    const val showLeaderboards = "showLeaderboards"
+    const val showAllLeaderboards = "showAllLeaderboards"
+    const val showSingleLeaderboard = "showSingleLeaderboard"
     const val showAchievements = "showAchievements"
     const val signIn = "signIn"
     const val signInLinkedUser =
