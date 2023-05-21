@@ -1,5 +1,4 @@
 import 'package:firebase_game_services/firebase_game_services.dart';
-import 'package:firebase_game_services_platform_interface/firebase_game_services_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -59,17 +58,29 @@ void main() {
       expect(result, isA<String>());
     });
 
-    test('showLeaderboards returns a string', () async {
-      final result = await FirebaseGameServices.instance.showLeaderboards(
+    test('showSingleLeaderboard returns a string', () async {
+      final result = await FirebaseGameServices.instance.showSingleLeaderboard(
         androidLeaderboardID: 'android_leaderboard_id',
         iOSLeaderboardID: 'ios_leaderboard_id',
       );
+      expect(result, isA<String>());
+    });
+    test('showAllLeaderboards returns a string', () async {
+      final result = await FirebaseGameServices.instance.showAllLeaderboards();
       expect(result, isA<String>());
     });
 
     test('showAccessPoint returns a string', () async {
       final result = await FirebaseGameServices.instance
           .showAccessPoint(AccessPointLocation.topLeading);
+      expect(result, isA<String>());
+    });
+    test('showDashboard returns a string', () async {
+      final result = await FirebaseGameServices.instance.showDashboard();
+      expect(result, isA<String>());
+    });
+    test('showPlayerProfile returns a string', () async {
+      final result = await FirebaseGameServices.instance.showPlayerProfile();
       expect(result, isA<String>());
     });
 

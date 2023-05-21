@@ -12,6 +12,7 @@ extension FirebaseGameServicesAuth on FirebaseGameServices {
   /// Return `true` if success
   /// [clientId] is only for Android if you want to provide a clientId other than the main one in you google-services.json
   /// [forceSignInIfCredentialAlreadyUsed] make user force sign in with game services link failed because of ERROR_CREDENTIAL_ALREADY_IN_USE
+  @Deprecated('Use only FirebaseGameServices.instance.signIn();')
   Future<bool> signInLinkedUser(
       {String? clientId,
       bool forceSignInIfCredentialAlreadyUsed = false}) async {

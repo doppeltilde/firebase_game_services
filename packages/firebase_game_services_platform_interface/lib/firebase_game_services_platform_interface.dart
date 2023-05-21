@@ -68,8 +68,23 @@ abstract class FirebaseGameServicesPlatform extends PlatformInterface {
   }
 
   /// It will open the leaderboards screen.
-  Future<String?> showLeaderboards(
+  Future<String?> showAllLeaderboards() async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// It will open the leaderboards screen.
+  Future<String?> showSingleLeaderboard(
       {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Shows the GC dashboard.
+  Future<String?> showDashboard() async {
+    throw UnimplementedError("not implemented.");
+  }
+
+  /// Shows the GC player profile.
+  Future<String?> showPlayerProfile() async {
     throw UnimplementedError("not implemented.");
   }
 

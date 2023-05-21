@@ -1,3 +1,18 @@
+## 2.2.0
+
+##### Breaking:
+
+- `FirebaseGameServices.instance.showLeaderboards()` was renamed into
+  `FirebaseGameServices.instance.showSingleLeaderboard()`.
+
+##### Added:
+
+- Added `FirebaseGameServices.instance.showAllLeaderboards()`.
+
+##### Deprecated:
+
+- `FirebaseGameServices.instance.signInLinkedUser()`
+
 ## 2.1.2
 
 - Fixed Android implementation.

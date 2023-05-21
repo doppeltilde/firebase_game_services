@@ -41,15 +41,6 @@ Call this before making any other action.
 await FirebaseGameServices.instance.signIn();
 ```
 
-#### Sign in linked user
-
-Signs in the currently linked user with native Game Service (Play Games on
-Android and GameCenter on iOS) to Firebase.
-
-```dart
-await FirebaseGameServices.instance.signInLinkedUser();
-```
-
 #### Save Game Data to Firebase
 
 This package works in harmony with the Firebase stack. You can utilize both
@@ -92,12 +83,20 @@ For static storage, I'd recommend using `Cloud Storage` or `PocketBase`.
 
 Of course you can also use your own backend.
 
-#### Show leaderboards
+#### Show all leaderboards
+
+Shows all leaderboards screen.
+
+```dart
+await FirebaseGameServices.instance.showAllLeaderboards();
+```
+
+#### Show single leaderboard
 
 To show the leaderboards screen. It takes the leaderbord id for android and iOS.
 
 ```dart
-await FirebaseGameServices.instance.showLeaderboards(iOSLeaderboardID: 'ios_leaderboard_id', androidLeaderboardID: 'android_leaderboard_id');
+await FirebaseGameServices.instance.showSingleLeaderboard(iOSLeaderboardID: 'ios_leaderboard_id', androidLeaderboardID: 'android_leaderboard_id');
 ```
 
 #### Submit score
@@ -183,6 +182,18 @@ await FirebaseGameServices.instance.increment(achievement: Achievement(androidID
 
 ```dart
 await FirebaseGameServices.instance.showAccessPoint(AccessPointLocation.topLeading, showHighlights: true);
+```
+
+#### Show Dashboard (Apple Only)
+
+```dart
+await FirebaseGameServices.instance.showDashboard();
+```
+
+#### Show Player Profile (Apple Only)
+
+```dart
+await FirebaseGameServices.instance.showPlayerProfile();
 ```
 
 #### Hide AccessPoint (Apple Only)

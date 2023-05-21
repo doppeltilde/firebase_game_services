@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 getSignIn() async {
   try {
     await FirebaseGameServices.instance.signIn();
-  } on Exception {
-    try {
-      await FirebaseGameServices.instance.signInLinkedUser();
-    } on Exception catch (e) {
-      print(e);
-    }
+  } on Exception catch (e) {
+    print(e);
   }
 }
 
@@ -51,9 +47,15 @@ class _MyAppState extends State<MyApp> {
                     child: const Text("Achievements")),
                 ElevatedButton(
                     onPressed: () async {
-                      await FirebaseGameServices.instance.showLeaderboards();
+                      await FirebaseGameServices.instance
+                          .showSingleLeaderboard();
                     },
-                    child: const Text("Leaderboards")),
+                    child: const Text("Single Leaderboard with Id")),
+                ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseGameServices.instance.showAllLeaderboards();
+                    },
+                    child: const Text("All Leaderboards")),
                 ElevatedButton(
                     onPressed: () async {
                       var id =
@@ -89,6 +91,8 @@ class _MyAppState extends State<MyApp> {
                       );
                     },
                     child: const Text("Unlock Achievement")),
+
+                // Platform Specific
                 ElevatedButton(
                     onPressed: () async {
                       await FirebaseGameServices.instance.showAccessPoint(
@@ -97,6 +101,16 @@ class _MyAppState extends State<MyApp> {
                       );
                     },
                     child: const Text("Show Accesspoint")),
+                ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseGameServices.instance.showDashboard();
+                    },
+                    child: const Text("Presents the main dashboard")),
+                ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseGameServices.instance.showPlayerProfile();
+                    },
+                    child: const Text("Presents the player's profile")),
                 ElevatedButton(
                     onPressed: () async {
                       var isUnderage =
