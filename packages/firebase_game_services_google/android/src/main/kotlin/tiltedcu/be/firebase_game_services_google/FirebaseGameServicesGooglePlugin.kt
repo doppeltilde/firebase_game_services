@@ -48,12 +48,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         fun getResourceFromContext(@NonNull context: Context, resName: String): String {
             val stringRes = context.resources.getIdentifier(resName, "string", context.packageName)
             if (stringRes == 0) {
-                throw IllegalArgumentException(
-                    String.format(
-                        "The 'R.string.%s' value it's not defined in your project's resources file.",
-                        resName
-                    )
-                )
+                throw IllegalArgumentException(String.format("The 'R.string.%s' value it's not defined in your project's resources file.", resName))
             }
             return context.getString(stringRes)
         }
@@ -69,7 +64,6 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             val isAuthenticated = isAuthenticatedTask.isSuccessful &&
                     isAuthenticatedTask.result.isAuthenticated
             if (isAuthenticated) {
-                Log.d("AUTH: ", isAuthenticatedTask.result.toString())
                 handleSignInResult()
             } else {
                 gamesSignInClient.signIn().addOnCompleteListener { task ->
@@ -86,60 +80,44 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     private fun handleSignInResult() {
         val activity = activity ?: return
 
-            achievementClient = PlayGames.getAchievementsClient(activity)
-            leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
+        achievementClient = PlayGames.getAchievementsClient(activity)
+        leaderboardsClient = PlayGames.getLeaderboardsClient(activity)
 
-            gamesClient?.setViewForPopups(activity.findViewById(android.R.id.content))
-            gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+        gamesClient?.setViewForPopups(activity.findViewById(android.R.id.content))
+        gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
 
-            if (method == Methods.signIn) {
-                signInFirebaseWithPlayGames()
-            } else if (method == Methods.signInLinkedUser) {
-                signInFirebaseWithPlayGames()
-            }
+        if (method == Methods.signIn) {
+            signInFirebaseWithPlayGames()
+        } else if (method == Methods.signInLinkedUser) {
+            signInFirebaseWithPlayGames()
+        }
     }
 
     private fun signInFirebaseWithPlayGames() {
         val auth = FirebaseAuth.getInstance()
         val activity = this.activity ?: return
 
-        val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
-        val playersClient = PlayGames.getPlayersClient(activity)
+        val authCode: String = clientId ?: getResourceFromContext(context, "default_web_client_id")
 
         // Doc Ref: https://developers.google.com/games/services/android/signin#request_server_side_access
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
         gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val serverAuthToken = task.result
-                Log.d("serverAuthToken", serverAuthToken)
-                val playerId = playersClient.currentPlayerId
 
                 val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
 
                 auth.signInWithCredential(credential).addOnCompleteListener { task2 ->
-                    Log.d("Success: ", task2.result.toString())
-                    Log.d("playerId: ", playerId.toString())
                     pendingResult?.success(true)
                 }
             } else {
                 gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Log.d("Result1: ", task.result.toString())
-
                             val serverAuthToken = task.result
 
                             val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
                             auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { task2 ->
-                                Log.d("isSuccess", task2.isSuccessful.toString())
-                                Log.d("serverAuthToken: ", serverAuthToken.toString())
-                                Log.d("credential: ", credential.toString())
-                                Log.d("Result2: ", task2.toString())
                                 if (task2.isSuccessful) {
-
-                                    Log.d("serverAuthToken: ", serverAuthToken.toString())
-                                    Log.d("credential: ", credential.toString())
-                                    Log.d("Result2: ", task2.result.toString())
-
                                     pendingResult?.success(true)
                                 } else {
                                     Log.e("Error:", task2.exception.toString())
@@ -258,7 +236,6 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         setupChannel(binding.binaryMessenger)
         context = binding.applicationContext
         PlayGamesSdk.initialize(context)
-        Log.i("LOG: ", "onAttachedToEngine")
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
