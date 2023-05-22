@@ -1,13 +1,9 @@
 ## 2.2.0
 
-##### Breaking:
-
-- `FirebaseGameServices.instance.showLeaderboards()` was renamed into
-  `FirebaseGameServices.instance.showSingleLeaderboard()`.
-
 ##### Added:
 
 - Added `FirebaseGameServices.instance.showAllLeaderboards()`.
+- Added `FirebaseGameServices.instance.showSingleLeaderboard()`.
 - Added `FirebaseGameServices.instance.showDashboard()`
   [Apple Specific](https://developer.apple.com/documentation/gamekit/displaying_the_game_center_dashboard#3678534).
 - Added `FirebaseGameServices.instance.showPlayerProfile()`
@@ -16,6 +12,7 @@
 ##### Deprecated:
 
 - `FirebaseGameServices.instance.signInLinkedUser()`
+- `FirebaseGameServices.instance.showLeaderboards()`
 
 ## 2.1.2
 
