@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import androidx.annotation.NonNull
 
 private const val CHANNEL_NAME = "firebase_game_services"
 private const val RC_SIGN_IN = 9000
@@ -39,12 +40,12 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     private var method: String? = null
     private var clientId: String? = null
-    private var gResult: Result? = null
+    private var pendingResult: Result? = null
     private var forceSignInIfCredentialAlreadyUsed: Boolean = false
 
     companion object {
         @JvmStatic
-        fun getResourceFromContext(context: Context, resName: String): String {
+        fun getResourceFromContext(@NonNull context: Context, resName: String): String {
             val stringRes = context.resources.getIdentifier(resName, "string", context.packageName)
             if (stringRes == 0) {
                 throw IllegalArgumentException(
@@ -58,7 +59,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         }
     }
 
-    private fun silentSignIn(result: Result) {
+    private fun silentSignIn() {
         val activity = activity ?: return
 
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
@@ -69,11 +70,11 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                     isAuthenticatedTask.result.isAuthenticated
             if (isAuthenticated) {
                 Log.d("AUTH: ", isAuthenticatedTask.result.toString())
-                handleSignInResult(result)
+                handleSignInResult()
             } else {
                 gamesSignInClient.signIn().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        handleSignInResult(result)
+                        handleSignInResult()
                     } else {
                         Log.e("Error: ", task.exception.toString())
                     }
@@ -82,7 +83,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         }
     }
 
-    private fun handleSignInResult(result: Result) {
+    private fun handleSignInResult() {
         val activity = activity ?: return
 
             achievementClient = PlayGames.getAchievementsClient(activity)
@@ -92,15 +93,15 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
 
             if (method == Methods.signIn) {
-                signInFirebaseWithPlayGames(result)
+                signInFirebaseWithPlayGames()
             } else if (method == Methods.signInLinkedUser) {
-                signInFirebaseWithPlayGames(result)
+                signInFirebaseWithPlayGames()
             }
     }
 
-    private fun signInFirebaseWithPlayGames(result: Result) {
+    private fun signInFirebaseWithPlayGames() {
         val auth = FirebaseAuth.getInstance()
-        val activity = this.activity!!
+        val activity = this.activity ?: return
 
         val authCode = clientId ?: getResourceFromContext(context, "default_web_client_id")
         val playersClient = PlayGames.getPlayersClient(activity)
@@ -118,10 +119,10 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 auth.signInWithCredential(credential).addOnCompleteListener { task2 ->
                     Log.d("Success: ", task2.result.toString())
                     Log.d("playerId: ", playerId.toString())
-                    result.success(true)
+                    pendingResult?.success(true)
                 }
             } else {
-                gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task: Task<String?> ->
+                gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d("Result1: ", task.result.toString())
 
@@ -139,21 +140,21 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                                     Log.d("credential: ", credential.toString())
                                     Log.d("Result2: ", task2.result.toString())
 
-                                    result.success(true)
+                                    pendingResult?.success(true)
                                 } else {
                                     Log.e("Error:", task2.exception.toString())
-                                    result.success(false)
+                                    pendingResult?.success(false)
                                 }
                             }
                         } else {
                             // Failed to retrieve authentication code.
                             Log.e("Error:", task.exception.toString())
-                            result.success(false)
+                            pendingResult?.success(false)
 
 
                         }
                     }
-            }
+                }
             }
     }
     //endregion
@@ -342,8 +343,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
         val signInAccount = result?.signInAccount
 
         if (result?.isSuccess == true && signInAccount != null) {
-            gamesClient?.setViewForPopups(activity!!.findViewById(android.R.id.content))
-            gamesClient?.setGravityForPopups(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+            handleSignInResult()
         } else {
             finishPendingOperationWithError(ApiException(result?.status ?: Status(0)))
         }
@@ -381,14 +381,16 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
             Methods.signIn -> {
                 method = Methods.signIn
                 clientId = call.argument<String>("client_id")
-                silentSignIn(result)
+                pendingResult = result
+                silentSignIn()
             }
             Methods.signInLinkedUser -> {
                 method = Methods.signInLinkedUser
                 clientId = call.argument<String>("client_id")
                 forceSignInIfCredentialAlreadyUsed =
                     call.argument<Boolean>("force_sign_in_credential_already_used") == true
-                silentSignIn(result)
+                pendingResult = result
+                silentSignIn()
             }
             Methods.getPlayerID -> {
                 getPlayerID(result)
