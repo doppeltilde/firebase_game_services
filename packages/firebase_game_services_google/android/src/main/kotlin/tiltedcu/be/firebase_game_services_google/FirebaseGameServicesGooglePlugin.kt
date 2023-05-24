@@ -108,7 +108,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
 
                 auth.signInWithCredential(credential).addOnCompleteListener { task2 ->
-                    pendingResult?.success(true)
+                    pendingResult?.success(task2.isSuccessful)
                 }
             } else {
                 gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
@@ -118,16 +118,16 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                             val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
                             auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { task2 ->
                                 if (task2.isSuccessful) {
-                                    pendingResult?.success(true)
+                                    pendingResult?.success(task2.isSuccessful)
                                 } else {
                                     Log.e("Error:", task2.exception.toString())
-                                    pendingResult?.success(false)
+                                    pendingResult?.success(task2.isSuccessful)
                                 }
                             }
                         } else {
                             // Failed to retrieve authentication code.
                             Log.e("Error:", task.exception.toString())
-                            pendingResult?.success(false)
+                            pendingResult?.success(task.isSuccessful)
 
 
                         }
@@ -361,6 +361,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                 pendingResult = result
                 silentSignIn()
             }
+            // DEPRECATED
             Methods.signInLinkedUser -> {
                 method = Methods.signInLinkedUser
                 clientId = call.argument<String>("client_id")

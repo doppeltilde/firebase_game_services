@@ -23,7 +23,7 @@ Dart package linking Google's Play Games and Apple's Game Center with Firebase.
 
 If you continue to encounter difficulties, kindly refer to the following
 discussion for further assistance:
-https://github.com/jonafeucht/firebase_game_services/discussions/13#discussion-5220447.
+[Troubleshooting Guide](https://github.com/jonafeucht/firebase_game_services/discussions/13#discussion-5220447).
 
 #### Minimum requirements
 
