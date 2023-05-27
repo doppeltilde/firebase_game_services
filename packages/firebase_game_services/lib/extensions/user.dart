@@ -1,6 +1,16 @@
 import 'package:firebase_game_services/firebase_game_services.dart';
 
 extension FirebaseGameServicesUser on FirebaseGameServices {
+  /// Presents the local player's profile.
+  Future<String?> showPlayerProfile() async {
+    return await FirebaseGameServices.platform.showPlayerProfile();
+  }
+
+  /// Presents the main dashboard.
+  Future<String?> showDashboard() async {
+    return await FirebaseGameServices.platform.showDashboard();
+  }
+
   /// Get the player id.
   /// On iOS the player id is unique for your game but not other games.
   Future<String?> getPlayerId() async {

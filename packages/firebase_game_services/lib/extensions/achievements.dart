@@ -36,12 +36,26 @@ extension FirebaseGameServicesAchievements on FirebaseGameServices {
     return await FirebaseGameServices.platform.showAchievements();
   }
 
-  /// It will open the leaderboards screen.
-  Future<String?> showLeaderboards(
+  /// Opens a single leaderboard screen.
+  Future<String?> showSingleLeaderboard(
       {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
-    return await FirebaseGameServices.platform.showLeaderboards(
+    return await FirebaseGameServices.platform.showSingleLeaderboard(
         iOSLeaderboardID: iOSLeaderboardID,
         androidLeaderboardID: androidLeaderboardID);
+  }
+
+  /// Opens a single leaderboard screen.
+  @Deprecated('Use showSingleLeaderboard() instead.')
+  Future<String?> showLeaderboards(
+      {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
+    return await FirebaseGameServices.platform.showSingleLeaderboard(
+        iOSLeaderboardID: iOSLeaderboardID,
+        androidLeaderboardID: androidLeaderboardID);
+  }
+
+  /// Presents the list of leaderboards.
+  Future<String?> showAllLeaderboards() async {
+    return await FirebaseGameServices.platform.showAllLeaderboards();
   }
 
   /// Show the iOS Access Point.

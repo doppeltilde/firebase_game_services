@@ -38,12 +38,27 @@ class MethodChannelFirebaseGameServices extends FirebaseGameServicesPlatform {
   }
 
   @override
-  Future<String?> showLeaderboards(
+  Future<String?> showSingleLeaderboard(
       {iOSLeaderboardID = "", androidLeaderboardID = ""}) async {
-    return await _channel.invokeMethod("showLeaderboards", {
+    return await _channel.invokeMethod("showSingleLeaderboard", {
       "leaderboardID":
           Helpers.isPlatformAndroid ? androidLeaderboardID : iOSLeaderboardID
     });
+  }
+
+  @override
+  Future<String?> showAllLeaderboards() async {
+    return await _channel.invokeMethod("showAllLeaderboards");
+  }
+
+  @override
+  Future<String?> showDashboard() async {
+    return await _channel.invokeMethod("showDashboard");
+  }
+
+  @override
+  Future<String?> showPlayerProfile() async {
+    return await _channel.invokeMethod("showPlayerProfile");
   }
 
   @override

@@ -25,9 +25,18 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
                 case "showAchievements":
                     showAchievements()
                     result("success")
-                case "showLeaderboards":
+                 case "showDashboard":
+                    showDashboard()
+                    result("success")
+                case "showPlayerProfile":
+                    showPlayerProfile()
+                    result("success")
+                case "showSingleLeaderboard":
                     let leaderboardID = (arguments?["iOSLeaderboardID"] as? String) ?? ""
-                    showLeaderboardWith(identifier: leaderboardID)
+                    showSingleLeaderboard(identifier: leaderboardID)
+                    result("success")
+                case "showAllLeaderboards":
+                    showAllLeaderboards()
                     result("success")
                 case "hideAccessPoint":
                     hideAccessPoint(result: result)
@@ -220,13 +229,25 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     }
     
     
-    // MARK: - Leaderboard
+    // MARK: - Leaderboards
 
-    private func showLeaderboardWith(identifier: String) {
+    private func showSingleLeaderboard(identifier: String) {
         let vc = GKGameCenterViewController()
         vc.gameCenterDelegate = self
         vc.viewState = .leaderboards
         vc.leaderboardIdentifier = identifier
+
+        #if os(iOS)
+        self.viewController?.present(vc, animated: true, completion: nil)
+        #else
+        self.viewController.presentAsSheet(vc)
+        #endif
+    }
+    
+    private func showAllLeaderboards() {
+        let vc = GKGameCenterViewController()
+        vc.gameCenterDelegate = self
+        vc.viewState = .leaderboards
 
         #if os(iOS)
         self.viewController?.present(vc, animated: true, completion: nil)
@@ -315,6 +336,30 @@ public class SwiftFirebaseGameServicesApplePlugin: NSObject, FlutterPlugin {
     }
 
     // MARK: - Game Player
+
+    private func showDashboard() {
+        let vc: GKGameCenterViewController = GKGameCenterViewController()
+        vc.gameCenterDelegate = self
+        vc.viewState = .dashboard
+
+        #if os(iOS)
+        self.viewController?.present(vc, animated: true, completion: nil)
+        #else
+        self.viewController.presentAsSheet(vc)
+        #endif
+    }
+
+    private func showPlayerProfile() {
+        let vc: GKGameCenterViewController = GKGameCenterViewController()
+        vc.gameCenterDelegate = self
+        vc.viewState = .localPlayerProfile
+
+        #if os(iOS)
+        self.viewController?.present(vc, animated: true, completion: nil)
+        #else
+        self.viewController.presentAsSheet(vc)
+        #endif
+    }
 
     private func getGamePlayerID(result: @escaping FlutterResult) {
         if #available(iOS 12.4, *) {
