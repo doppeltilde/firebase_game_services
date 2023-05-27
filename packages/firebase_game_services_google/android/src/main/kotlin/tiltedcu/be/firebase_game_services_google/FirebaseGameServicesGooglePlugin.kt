@@ -19,7 +19,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import androidx.annotation.NonNull
 
 private const val CHANNEL_NAME = "firebase_game_services"
 private const val RC_SIGN_IN = 9000
@@ -43,7 +42,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
     companion object {
         @JvmStatic
-        fun getResourceFromContext(@NonNull context: Context, resName: String): String {
+        fun getResourceFromContext(context: Context, resName: String): String {
             val stringRes = context.resources.getIdentifier(resName, "string", context.packageName)
             if (stringRes == 0) {
                 throw IllegalArgumentException(String.format("The 'R.string.%s' value it's not defined in your project's resources file.", resName))

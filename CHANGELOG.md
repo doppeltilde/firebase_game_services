@@ -2,12 +2,16 @@
 
 ##### Added:
 
-- Added `FirebaseGameServices.instance.showAllLeaderboards()`.
-- Added `FirebaseGameServices.instance.showSingleLeaderboard()`.
-- Added `FirebaseGameServices.instance.showDashboard()`
+- `FirebaseGameServices.instance.showAllLeaderboards()`.
+- `FirebaseGameServices.instance.showSingleLeaderboard()`.
+- `FirebaseGameServices.instance.showDashboard()`
   [Apple Specific](https://developer.apple.com/documentation/gamekit/displaying_the_game_center_dashboard#3678534).
-- Added `FirebaseGameServices.instance.showPlayerProfile()`
+- `FirebaseGameServices.instance.showPlayerProfile()`
   [Apple Specific](https://developer.apple.com/documentation/gamekit/displaying_the_game_center_dashboard#3678533).
+
+#### Fixed:
+
+- `Play Games Services v2` implementation.
 
 ##### Deprecated:
 
