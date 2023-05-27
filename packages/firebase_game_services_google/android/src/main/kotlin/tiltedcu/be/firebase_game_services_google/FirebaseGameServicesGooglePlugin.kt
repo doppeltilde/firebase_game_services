@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.Gravity
-import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Status
 import com.google.android.gms.games.*
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -101,9 +99,9 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
 
         // Doc Ref: https://developers.google.com/games/services/android/signin#request_server_side_access
         val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
-        gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val serverAuthToken = task.result
+        gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task1 ->
+            if (task1.isSuccessful) {
+                val serverAuthToken = task1.result
 
                 val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
 
@@ -111,23 +109,23 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
                     pendingResult?.success(task2.isSuccessful)
                 }
             } else {
-                gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val serverAuthToken = task.result
+                gamesSignInClient.requestServerSideAccess(authCode, false).addOnCompleteListener { task2 ->
+                        if (task2.isSuccessful) {
+                            val serverAuthToken = task2.result
 
                             val credential = PlayGamesAuthProvider.getCredential(serverAuthToken!!)
-                            auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { task2 ->
-                                if (task2.isSuccessful) {
-                                    pendingResult?.success(task2.isSuccessful)
+                            auth.currentUser?.linkWithCredential(credential)?.addOnCompleteListener { task3 ->
+                                if (task3.isSuccessful) {
+                                    pendingResult?.success(task3.isSuccessful)
                                 } else {
-                                    Log.e("Error:", task2.exception.toString())
-                                    pendingResult?.success(task2.isSuccessful)
+                                    Log.e("Error:", task3.exception.toString())
+                                    pendingResult?.success(task3.isSuccessful)
                                 }
                             }
                         } else {
                             // Failed to retrieve authentication code.
-                            Log.e("Error:", task.exception.toString())
-                            pendingResult?.success(task.isSuccessful)
+                            Log.e("Error:", task2.exception.toString())
+                            pendingResult?.success(task2.isSuccessful)
 
 
                         }
@@ -314,16 +312,7 @@ class FirebaseGameServicesGooglePlugin(private var activity: Activity? = null) :
     //region ActivityResultListener
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == RC_SIGN_IN) {
-
-        val result = data?.let { Auth.GoogleSignInApi.getSignInResultFromIntent(it) }
-
-        val signInAccount = result?.signInAccount
-
-        if (result?.isSuccess == true && signInAccount != null) {
-            handleSignInResult()
-        } else {
-            finishPendingOperationWithError(ApiException(result?.status ?: Status(0)))
-        }
+        silentSignIn()
         return true
         }
         return false
