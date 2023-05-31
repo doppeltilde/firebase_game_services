@@ -1,2 +1,4 @@
 *.env
 .fvm/flutter_sdk
+*.flutter-plugins-dependencies
+*.flutter-plugins
